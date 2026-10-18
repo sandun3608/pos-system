@@ -14,6 +14,7 @@ import { CustomerManagement } from './pages/CustomerManagement';
 import { ShiftModal } from './components/ShiftModal';
 import { LockScreenModal } from './components/LockScreenModal';
 import { SubscriptionLockOverlay } from './components/SubscriptionLockOverlay';
+import { LaunchpadHub } from './components/LaunchpadHub';
 import { Menu, ShoppingBag, ShoppingCart, BookOpen, Package, BarChart3, Lock, Sun, Moon } from 'lucide-react';
 import type { AppSettings, Shift, AppModule } from './types';
 import { api } from './services/api';
@@ -22,6 +23,7 @@ import { useTheme } from './context/ThemeContext';
 export function App() {
   const { theme, toggleTheme, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<AppModule>('pos');
+  const [isLaunchpadOpen, setIsLaunchpadOpen] = useState<boolean>(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
@@ -153,6 +155,7 @@ export function App() {
       localStorage.setItem('pos_locked', 'true');
     } catch {}
     setIsLocked(true);
+    setIsLaunchpadOpen(true);
     setActiveTab('pos');
   };
 
@@ -166,6 +169,7 @@ export function App() {
       sessionStorage.removeItem('pos_user');
     }
     setIsLocked(false);
+    setIsLaunchpadOpen(true);
     localStorage.setItem('pos_locked', 'false');
   };
 
@@ -210,72 +214,97 @@ export function App() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#070b13] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-emerald-500 selection:text-black">
-      {/* Mobile Top Header (Hidden on md and larger) */}
-      <header className="md:hidden flex items-center justify-between px-3.5 py-2.5 bg-[#090e18] border-b border-[#162135] shrink-0 z-30 select-none">
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-755 text-slate-200 active:scale-95 transition cursor-pointer"
-            aria-label="Open navigation menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-              <ShoppingBag className="w-4 h-4" />
+      {isLaunchpadOpen ? (
+        <LaunchpadHub
+          settings={settings}
+          activeShift={activeShift}
+          currentUser={currentUser}
+          hasModuleAccess={hasModuleAccess}
+          onSelectModule={(mod) => {
+            if (!hasModuleAccess(mod)) return;
+            setActiveTab(mod);
+            setIsLaunchpadOpen(false);
+          }}
+          onEnterSystem={() => {
+            setActiveTab('pos');
+            setIsLaunchpadOpen(false);
+          }}
+          onOpenShiftModal={handleOpenShiftModal}
+          onLock={handleLock}
+          onLogout={handleLogout}
+        />
+      ) : (
+        <>
+          {/* Mobile Top Header (Hidden on md and larger) */}
+          <header className="md:hidden flex items-center justify-between px-3.5 py-2.5 bg-[#090e18] border-b border-[#162135] shrink-0 z-30 select-none">
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-755 text-slate-200 active:scale-95 transition cursor-pointer"
+                aria-label="Open navigation menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div
+                onClick={() => setIsLaunchpadOpen(true)}
+                className="flex items-center gap-2 min-w-0 cursor-pointer"
+              >
+                <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white shrink-0">
+                  <ShoppingBag className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-extrabold text-white text-sm tracking-tight truncate max-w-[150px] sm:max-w-[220px]">
+                  {settings?.store_name || 'MotorParts POS'}
+                </span>
+              </div>
             </div>
-            <span className="font-extrabold text-white text-sm tracking-tight truncate max-w-[150px] sm:max-w-[220px]">
-              {settings?.store_name || 'MotorParts POS'}
-            </span>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {/* Theme Switcher Button */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 active:scale-95 transition cursor-pointer"
-          >
-            {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-indigo-400" />}
-          </button>
+            <div className="flex items-center gap-2">
+              {/* Theme Switcher Button */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 active:scale-95 transition cursor-pointer"
+              >
+                {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+              </button>
 
-          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 font-bold uppercase">
-            {currentUser?.username || 'cashier'}
-          </span>
-          <button
-            type="button"
-            onClick={handleLock}
-            title="Lock Register (F9)"
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-755 text-amber-400 border border-slate-700 active:scale-95 transition cursor-pointer"
-          >
-            <Lock className="w-4 h-4" />
-          </button>
-        </div>
-      </header>
+              <span className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 font-bold uppercase">
+                {currentUser?.username || 'cashier'}
+              </span>
+              <button
+                type="button"
+                onClick={handleLock}
+                title="Lock Register (F9)"
+                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-755 text-amber-400 border border-slate-700 active:scale-95 transition cursor-pointer"
+              >
+                <Lock className="w-4 h-4" />
+              </button>
+            </div>
+          </header>
 
-      {/* Navigation Sidebar (Desktop + Mobile Drawer) */}
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={(tab) => {
-          if (!hasModuleAccess(tab)) return;
-          setActiveTab(tab);
-        }}
-        settings={settings}
-        activeShift={activeShift}
-        currentUser={currentUser}
-        onOpenShiftModal={handleOpenShiftModal}
-        onOpenXReport={handleOpenXReport}
-        onLock={handleLock}
-        onLogout={handleLogout}
-        isMobileOpen={isMobileMenuOpen}
-        onCloseMobile={() => setIsMobileMenuOpen(false)}
-      />
+          {/* Navigation Sidebar (Desktop + Mobile Drawer) */}
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={(tab) => {
+              if (!hasModuleAccess(tab)) return;
+              setActiveTab(tab);
+            }}
+            settings={settings}
+            activeShift={activeShift}
+            currentUser={currentUser}
+            onOpenShiftModal={handleOpenShiftModal}
+            onOpenXReport={handleOpenXReport}
+            onLock={handleLock}
+            onLogout={handleLogout}
+            onOpenHub={() => setIsLaunchpadOpen(true)}
+            isMobileOpen={isMobileMenuOpen}
+            onCloseMobile={() => setIsMobileMenuOpen(false)}
+          />
 
-      {/* Main Screen Content */}
-      <main className="flex-1 min-w-0 h-full flex flex-col overflow-hidden">
+          {/* Main Screen Content */}
+          <main className="flex-1 min-w-0 h-full flex flex-col overflow-hidden">
         {activeTab === 'pos' && hasModuleAccess('pos') && (
           <PosTerminal
             settings={settings}
@@ -434,6 +463,8 @@ export function App() {
           <span className="text-[10px] mt-0.5">More</span>
         </button>
       </nav>
+        </>
+      )}
 
       {/* Shared Shift Modal (Start / X-Report / Z-Report) */}
       <ShiftModal

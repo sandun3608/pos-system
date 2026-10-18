@@ -52,7 +52,10 @@ interface GrnDraftItem {
 }
 
 export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentUser }) => {
-  const [activeTab, setActiveTab] = useState<'create' | 'history'>('create');
+  const [activeTab, setActiveTab] = useState<'create' | 'history'>('history');
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState<boolean>(false);
+  const [isCreateGrnModalOpen, setIsCreateGrnModalOpen] = useState<boolean>(false);
+  const [productSaveNotice, setProductSaveNotice] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [grnList, setGrnList] = useState<GoodsReceivedNote[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -122,6 +125,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
   const [quickProductForm, setQuickProductForm] = useState<{
     barcode: string;
     sku: string;
+    stock_quantity: string | number;
     name: string;
     brand: string;
     category_id: string;
@@ -132,6 +136,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
   }>({
     barcode: '',
     sku: '',
+    stock_quantity: '',
     name: '',
     brand: '',
     category_id: '',
@@ -161,13 +166,12 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
 
   useEffect(() => {
     loadInitialData();
+    loadHistory();
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'history') {
-      loadHistory();
-    }
-  }, [activeTab, historySearch, historyFromDate, historyToDate, historyPaymentFilter]);
+    loadHistory();
+  }, [historySearch, historyFromDate, historyToDate, historyPaymentFilter]);
 
   // Click outside listener for product search dropdown
   useEffect(() => {
@@ -223,11 +227,12 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
   const loadInitialData = async () => {
     try {
       setLoading(true);
-      const [sups, grnStats, cats, reminders] = await Promise.all([
+      const [sups, grnStats, cats, reminders, nextCode] = await Promise.all([
         api.getSuppliers().catch(() => []),
         api.getGRNStats().catch(() => null),
         fetch('/api/products/categories').then((r) => (r.ok ? r.json() : [])).catch(() => []),
         api.getGRNDueReminders().catch(() => []),
+        api.getNextBarcode().catch(() => '1000030'),
       ]);
       const validSups = Array.isArray(sups) ? sups : [];
       setSuppliers(validSups);
@@ -235,6 +240,15 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
       const validCats = Array.isArray(cats) ? cats : [];
       setCategories(validCats);
       setDueReminders(Array.isArray(reminders) ? reminders : []);
+      if (nextCode) {
+        setSuggestedBarcode(nextCode);
+        setQuickProductForm((prev) => ({
+          ...prev,
+          barcode: prev.barcode || nextCode,
+          sku: prev.sku || nextCode,
+          category_id: prev.category_id || (validCats[0]?.id || ''),
+        }));
+      }
       if (validSups.length > 0) {
         setSelectedSupplierId(validSups[0].id);
       } else {
@@ -525,6 +539,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
     setQuickProductForm({
       barcode: effectiveBarcode,
       sku: effectiveBarcode,
+      stock_quantity: '',
       name: isBarcode ? '' : initialBarcode.trim(),
       brand: '',
       category_id: categories[0]?.id || '',
@@ -546,24 +561,46 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
       const numCost = Number(quickProductForm.cost_price) || 0;
       const numSelling = Number(quickProductForm.selling_price) || 0;
       const numMrp = Number(quickProductForm.mrp) || numSelling || 0;
+      const numQty = Math.max(0, Number(quickProductForm.stock_quantity) || 0);
 
       const created = await api.saveProduct({
         ...quickProductForm,
+        sku: quickProductForm.barcode,
         cost_price: numCost,
         selling_price: numSelling,
         mrp: numMrp,
-        is_in_inventory: 0,
-        stock_quantity: 0,
+        is_in_inventory: numQty > 0 ? 1 : 0,
+        stock_quantity: numQty,
       });
+      const wasModalOpen = isQuickProductOpen;
       setIsQuickProductOpen(false);
-      addProductToDraft(created);
+      if (wasModalOpen) {
+        addProductToDraft(created);
+      }
+      setProductSaveNotice(
+        `"${created.name}" (Barcode: ${created.barcode}${numQty > 0 ? ` • Qty: ${numQty} ${created.unit || 'pcs'}` : ''}) saved to Catalog & Inventory!`
+      );
+      setTimeout(() => setProductSaveNotice(null), 5000);
       setSearchFeedback({
         type: 'success',
-        message: `Registered "${created.name}" and added to delivery list!`,
+        message: `Registered "${created.name}" (Qty: ${numQty})!`,
       });
 
-      // Refresh next barcode suggestion in background
-      api.getNextBarcode().then(setSuggestedBarcode).catch(() => {});
+      // Refresh next barcode suggestion and reset form for next item
+      const nextCode = await api.getNextBarcode().catch(() => '1000030');
+      setSuggestedBarcode(nextCode);
+      setQuickProductForm({
+        barcode: nextCode,
+        sku: nextCode,
+        stock_quantity: '',
+        name: '',
+        brand: '',
+        category_id: categories[0]?.id || '',
+        cost_price: '',
+        selling_price: '',
+        mrp: '',
+        unit: 'pcs',
+      });
     } catch (err: any) {
       alert(`Failed to save product: ${err.message}`);
     }
@@ -695,6 +732,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
       api.getGRNDueReminders().then(setDueReminders).catch(() => {});
 
       // Open the generated report modal for printing
+      setIsCreateGrnModalOpen(false);
       openReportModal(result.grn);
 
     } catch (err: any) {
@@ -774,776 +812,208 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#070b13] text-slate-100 overflow-hidden">
-      {/* Top Header Bar */}
-      <header className="px-3 sm:px-6 py-3 sm:py-4 bg-[#0d1527]/90 border-b border-slate-800/80 flex items-center justify-between shrink-0">
+      {/* Clean Top Header Bar */}
+      <header className="px-4 sm:px-6 py-3 bg-[#0d1527]/90 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shrink-0">
-            <ClipboardCheck className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-sm">
+            <Package className="w-5 h-5 text-white" />
           </div>
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Goods Received Note (GRN)</h1>
-              <span className="text-[11px] sm:text-xs px-2 py-0.5 rounded-full font-medium bg-teal-950 text-teal-400 border border-teal-800">
-                Goods Inward & Inventory Sync
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">Add New Product & GRN</h1>
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-400 border border-emerald-700">
+                Catalog & Stock Management
               </span>
             </div>
-            <p className="text-xs text-slate-400 hidden sm:block">
-              Receive outside deliveries, sync store stock and multi-batch prices, and print official receiving vouchers.
+            <p className="text-[11px] text-slate-400 hidden sm:block">
+              Select an option below to register a new product to the catalog or receive supplier stock deliveries
             </p>
           </div>
         </div>
 
-        {/* Stats Badges */}
-        <div className="hidden lg:flex items-center gap-4">
-          <div className="bg-[#0b1322] border border-slate-800/80 px-3.5 py-1.5 rounded-xl flex items-center gap-3">
+        {/* Right Stats Badges */}
+        <div className="hidden md:flex items-center gap-2.5">
+          <div className="bg-[#0b1322] border border-slate-800/80 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5">
             <Clock className="w-4 h-4 text-cyan-400" />
             <div>
-              <div className="text-[10px] text-slate-400 uppercase font-semibold">Today's Inward</div>
-              <div className="text-xs font-bold text-white">
+              <div className="text-[9px] text-slate-400 uppercase font-bold">Today's Inward</div>
+              <div className="text-xs font-extrabold text-white">
                 {stats?.today?.count || 0} deliveries ({currency}{Number(stats?.today?.spend || 0).toLocaleString()})
               </div>
             </div>
           </div>
-          <div className="bg-[#0b1322] border border-slate-800/80 px-3.5 py-1.5 rounded-xl flex items-center gap-3">
+          <div className="bg-[#0b1322] border border-slate-800/80 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5">
             <Layers className="w-4 h-4 text-emerald-400" />
             <div>
-              <div className="text-[10px] text-slate-400 uppercase font-semibold">Month-to-Date</div>
-              <div className="text-xs font-bold text-white">
+              <div className="text-[9px] text-slate-400 uppercase font-bold">Month-to-Date</div>
+              <div className="text-xs font-extrabold text-white">
                 {currency}{Number(stats?.this_month?.spend || 0).toLocaleString()}
               </div>
             </div>
           </div>
-          {stats?.payments && (
-            <div className="bg-[#0b1322] border border-slate-800/80 px-3.5 py-1.5 rounded-xl flex items-center gap-3">
-              <AlertTriangle
-                className={`w-4 h-4 ${
-                  (stats.payments.due_soon_count || 0) + (stats.payments.overdue_count || 0) > 0
-                    ? 'text-amber-400 animate-pulse'
-                    : 'text-slate-500'
-                }`}
-              />
-              <div>
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">Due Soon / Overdue</div>
-                <div className="text-xs font-bold text-white">
-                  {(stats.payments.due_soon_count || 0) + (stats.payments.overdue_count || 0)} bills ({currency}
-                  {Number(
-                    (stats.payments.due_soon_balance || 0) + (stats.payments.overdue_balance || 0)
-                  ).toLocaleString()}
-                  )
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </header>
 
-      {/* Tabs Sub-Navigation */}
-      <div className="px-3 sm:px-6 border-b border-slate-800 bg-[#0a101f] flex items-center justify-between shrink-0 overflow-x-auto">
-        <div className="flex items-center gap-2 pt-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('create')}
-            className={`px-4 py-2.5 rounded-t-xl text-sm font-semibold transition border-b-2 flex items-center gap-2 cursor-pointer shrink-0 ${
-              activeTab === 'create'
-                ? 'border-teal-500 text-teal-400 bg-slate-900/60'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Delivery (Create GRN)</span>
-            {draftItems.length > 0 && (
-              <span className="w-5 h-5 rounded-full bg-teal-500 text-slate-950 font-bold text-[10px] flex items-center justify-center">
-                {draftItems.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('history')}
-            className={`px-4 py-2.5 rounded-t-xl text-sm font-semibold transition border-b-2 flex items-center gap-2 cursor-pointer shrink-0 ${
-              activeTab === 'history'
-                ? 'border-teal-500 text-teal-400 bg-slate-900/60'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Receipt className="w-4 h-4" />
-            <span>GRN History & Payments</span>
-            {dueReminders.length > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] flex items-center gap-1 animate-pulse">
-                <Bell className="w-3 h-3" />
-                {dueReminders.length} due
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
-
       {/* Main Content Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-6">
-        {/* System-Triggered Payment Due Notification (Active within 3 days until marked PAID) */}
-        {dueReminders.length > 0 && (
-          <div className="max-w-7xl mx-auto mb-6 bg-gradient-to-r from-amber-950/50 via-slate-900 to-amber-950/40 border border-amber-500/40 rounded-2xl p-4 text-amber-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0 border border-amber-500/30">
-                <Bell className="w-5 h-5 animate-bounce" />
-              </div>
-              <div>
-                <div className="text-sm font-bold text-white flex items-center gap-2">
-                  <span>System Payment Due Alert</span>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500 text-slate-950">
-                    {dueReminders.length} {dueReminders.length === 1 ? 'Delivery' : 'Deliveries'} Due Soon (≤ 3 Days) or Overdue
-                  </span>
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 py-4">
+        <div className="max-w-7xl mx-auto space-y-4">
+          {/* System-Triggered Payment Due Notification */}
+          {dueReminders.length > 0 && (
+            <div className="bg-amber-500/10 border border-amber-400 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 shrink-0 border border-amber-500/30">
+                  <Bell className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-slate-300 mt-1">
-                  Supplier deliveries require settlement. Total pending balance:{' '}
-                  <strong className="text-amber-400 font-mono text-sm">
-                    {currency}
-                    {dueReminders
-                      .reduce((sum, g) => sum + Math.max(0, (Number(g.total_cost) || 0) - (Number(g.paid_amount) || 0)), 0)
-                      .toFixed(2)}
-                  </strong>
-                </p>
+                <div>
+                  <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <span>Supplier Payment Due Alert</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500 text-white">
+                      {dueReminders.length} Due Soon
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Total pending supplier balance:{' '}
+                    <strong className="text-amber-400 font-mono text-xs">
+                      {currency}
+                      {dueReminders
+                        .reduce((sum, g) => sum + Math.max(0, (Number(g.total_cost) || 0) - (Number(g.paid_amount) || 0)), 0)
+                        .toFixed(2)}
+                    </strong>
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('history');
+                  setHistoryPaymentFilter('DUE_SOON');
+                }}
+                className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer shrink-0"
+              >
+                <span>Review & Pay Now</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* ==================== TWO LARGE SIDE-BY-SIDE ICON CARDS (POPUP LAUNCHERS) ==================== */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            {/* ICON CARD 1: ADD NEW PRODUCT */}
+            <div
+              onClick={() => {
+                handleOpenQuickProduct();
+                setIsAddProductModalOpen(true);
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleOpenQuickProduct();
+                  setIsAddProductModalOpen(true);
+                }
+              }}
+              className="grn-split-card rounded-2xl p-5 flex items-center justify-between gap-4 cursor-pointer text-left hover:border-emerald-500/60 hover:shadow-lg transition group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="grn-split-icon-emerald w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Plus className="w-9 h-9 stroke-[2.75]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-700">
+                      1. Catalog Registration
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-600">Pop-up Form</span>
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 mt-1 tracking-tight">
+                    Add New Product
+                  </h2>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Click to open pop-up to register new barcode, prices & initial stock
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition grn-split-pill-active-emerald shadow-md">
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span className="hidden sm:inline">Add Product</span>
+              </div>
+            </div>
+
+            {/* ICON CARD 2: STOCK RECEIVING (GRN) */}
+            <div
+              onClick={() => setIsCreateGrnModalOpen(true)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') setIsCreateGrnModalOpen(true);
+              }}
+              className="grn-split-card rounded-2xl p-5 flex items-center justify-between gap-4 cursor-pointer text-left hover:border-teal-500/60 hover:shadow-lg transition group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="grn-split-icon-teal w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <ClipboardCheck className="w-9 h-9 stroke-[2.25]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-700">
+                      2. Supplier Stock & Bills
+                    </span>
+                    <span className="text-[10px] font-bold text-teal-600">Pop-up Form</span>
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 mt-1 tracking-tight">
+                    Stock Receiving (GRN)
+                  </h2>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Click to open pop-up to receive incoming deliveries & settle bills
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCreateGrnModalOpen(true);
+                  }}
+                  className="px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition grn-split-pill-active-teal shadow-md cursor-pointer"
+                >
+                  <Package className="w-4 h-4 stroke-[2.25]" />
+                  <span>New GRN</span>
+                  {draftItems.length > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px]">
+                      {draftItems.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+        {/* Success Notice if Product was just added */}
+        {productSaveNotice && (
+          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5 text-xs sm:text-sm font-bold text-emerald-800">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span>{productSaveNotice}</span>
             </div>
             <button
               type="button"
               onClick={() => {
-                setActiveTab('history');
-                setHistoryPaymentFilter('DUE_SOON');
+                setActiveTab('create');
+                setIsCreateGrnModalOpen(true);
               }}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 transition shadow-md cursor-pointer shrink-0"
+              className="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-700 transition"
             >
-              <span>Review & Pay Now</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Open Stock Receiving (GRN)</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
-        {activeTab === 'create' ? (
-          /* TAB 1: CREATE GRN */
-          <form onSubmit={handleProcessGRN} className="space-y-6 max-w-7xl mx-auto">
-            {/* Delivery Header Card */}
-            <div className="bg-[#0b1322] border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  <Building2 className="w-4 h-4 text-teal-400" />
-                  <span>1. Delivery & Supplier Information</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSupplierModalTab('manage');
-                      setIsAddSupplierOpen(true);
-                    }}
-                    className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 font-semibold cursor-pointer"
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                    <span>Manage Suppliers</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSupplierModalTab('add');
-                      setIsAddSupplierOpen(true);
-                    }}
-                    className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 font-semibold cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>New Supplier</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                {/* Supplier Picker */}
-                <div className="lg:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">
-                    Supplier / Vendor <span className="text-rose-400">*</span>
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={selectedSupplierId}
-                      onChange={(e) => setSelectedSupplierId(e.target.value)}
-                      className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden"
-                    >
-                      {(suppliers || []).map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name} {s.contact_name ? `(${s.contact_name})` : ''}
-                        </option>
-                      ))}
-                      <option value="custom">+ Other / Direct Van Distributor</option>
-                    </select>
-                  </div>
-                  {selectedSupplierId === 'custom' && (
-                    <input
-                      type="text"
-                      placeholder="Type custom supplier / van name..."
-                      value={customSupplierName}
-                      onChange={(e) => setCustomSupplierName(e.target.value)}
-                      required
-                      className="mt-2 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden"
-                    />
-                  )}
-                </div>
-
-                {/* Supplier Invoice / Bill # */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">
-                    Supplier Bill / Invoice #
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. INV-98124"
-                    value={invoiceNumber}
-                    onChange={(e) => setInvoiceNumber(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden"
-                  />
-                </div>
-
-                {/* Delivery Date */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">
-                    Received Date
-                  </label>
-                  <input
-                    type="date"
-                    value={receivedDate}
-                    onChange={(e) => setReceivedDate(e.target.value)}
-                    required
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden"
-                  />
-                </div>
-
-                {/* Received By Staff */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">
-                    Receiver / Staff Name
-                  </label>
-                  <input
-                    type="text"
-                    value={receivedByName}
-                    onChange={(e) => setReceivedByName(e.target.value)}
-                    required
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden"
-                  />
-                </div>
-              </div>
-
-              {/* Optional Delivery Notes */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Delivery Notes / Remarks</label>
-                <input
-                  type="text"
-                  placeholder="Optional delivery notes (e.g. Van driver contact, damaged boxes, discount agreements)..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:border-teal-500 outline-hidden"
-                />
-              </div>
-
-              {/* Payment Terms & Due Schedule */}
-              <div className="pt-3 border-t border-slate-800/80 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-teal-400">
-                  <Banknote className="w-4 h-4" />
-                  <span>Payment Terms & Due Schedule</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Payment Method Selector */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1">
-                      Payment Method
-                    </label>
-                    <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-700">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('cash')}
-                        className={`py-1.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                          paymentMethod === 'cash'
-                            ? 'bg-emerald-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        <Banknote className="w-3.5 h-3.5" />
-                        <span>Cash</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('cheque')}
-                        className={`py-1.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                          paymentMethod === 'cheque'
-                            ? 'bg-cyan-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Cheque</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Payment Term Option */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1">
-                      Settlement Status
-                    </label>
-                    <select
-                      value={paymentOption}
-                      onChange={(e: any) => setPaymentOption(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden"
-                    >
-                      <option value="credit">Credit Delivery (Pay on Due Date)</option>
-                      <option value="full">Paid in Full Upon Delivery</option>
-                      <option value="partial">Partial Paid Upon Delivery</option>
-                    </select>
-                  </div>
-
-                  {/* Payment Due Date */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1">
-                      {paymentOption === 'full' ? 'Settled Date' : 'Payment Due Date'}
-                      {paymentOption !== 'full' && <span className="text-amber-400 ml-1">(Reminder active)</span>}
-                    </label>
-                    <input
-                      type="date"
-                      value={paymentDueDate}
-                      onChange={(e) => setPaymentDueDate(e.target.value)}
-                      required={paymentOption !== 'full'}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden font-mono"
-                    />
-                  </div>
-
-                  {/* Upfront Amount (if partial) */}
-                  {paymentOption === 'partial' && (
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-1">
-                        Amount Paid Now ({currency}) <span className="text-rose-400">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="e.g. 5000"
-                        value={upfrontPaidAmount}
-                        onChange={(e) => setUpfrontPaidAmount(e.target.value)}
-                        required
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold focus:border-teal-500 outline-hidden font-mono"
-                      />
-                    </div>
-                  )}
-
-                  {/* Cheque Details (if Cheque selected) */}
-                  {paymentMethod === 'cheque' && (
-                    <>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1">
-                          Cheque # / Ref
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. CHQ-928104"
-                          value={chequeNumber}
-                          onChange={(e) => setChequeNumber(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden font-mono"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1">
-                          Cheque Date
-                        </label>
-                        <input
-                          type="date"
-                          value={chequeDate}
-                          onChange={(e) => setChequeDate(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-teal-500 outline-hidden font-mono"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Line Items Entry Card */}
-            <div className="bg-[#0b1322] border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  <Package className="w-4 h-4 text-teal-400" />
-                  <span>2. Add Incoming Delivery Items</span>
-                  <span className="text-xs text-slate-400 font-normal">({draftItems.length} items in list)</span>
-                </div>
-
-                {/* Item Search & Barcode Scanner */}
-                <div ref={searchContainerRef} className="relative w-full md:w-[460px]">
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                      <input
-                        ref={searchInputRef}
-                        type="text"
-                        placeholder="Scan barcode / GTIN or search 9,500+ items in catalog..."
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleBarcodeScanOrSubmit();
-                          } else if (e.key === 'Escape') {
-                            setShowSearchDropdown(false);
-                          }
-                        }}
-                        onFocus={() => {
-                          if (searchResults.length > 0 || searchInput.trim().length > 0) {
-                            setShowSearchDropdown(true);
-                          }
-                        }}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-16 py-2 text-xs text-white focus:border-teal-500 outline-hidden font-sans"
-                      />
-                      <div className="absolute right-2.5 top-2 flex items-center gap-1">
-                        {isSearchingProduct ? (
-                          <Loader2 className="w-4 h-4 text-teal-400 animate-spin" />
-                        ) : searchInput.trim().length > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => handleBarcodeScanOrSubmit()}
-                            className="text-[10px] bg-teal-500/20 text-teal-300 hover:bg-teal-500 hover:text-slate-950 font-bold px-1.5 py-0.5 rounded transition cursor-pointer"
-                            title="Lookup Barcode / GTIN (Enter)"
-                          >
-                            Enter ↵
-                          </button>
-                        ) : (
-                          <Barcode className="w-4 h-4 text-slate-500" />
-                        )}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleOpenQuickProduct(searchInput)}
-                      className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-xl text-xs font-semibold flex items-center gap-1 shrink-0 border border-slate-700/60 transition cursor-pointer"
-                      title="Register product if barcode not found in catalog"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">New Product</span>
-                    </button>
-                  </div>
-
-                  {/* Real-time Status / Feedback Alert */}
-                  {searchFeedback && (
-                    <div
-                      className={`mt-1.5 px-3 py-1.5 rounded-lg text-xs flex items-center justify-between transition ${
-                        searchFeedback.type === 'success'
-                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80'
-                          : searchFeedback.type === 'error'
-                          ? 'bg-rose-950/80 text-rose-300 border border-rose-800/80'
-                          : 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/80'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {searchFeedback.type === 'success' && <Check className="w-3.5 h-3.5 shrink-0" />}
-                        {searchFeedback.type === 'error' && <AlertCircle className="w-3.5 h-3.5 shrink-0" />}
-                        <span>{searchFeedback.message}</span>
-                      </div>
-                      {searchFeedback.type === 'error' && (
-                        <button
-                          type="button"
-                          onClick={() => handleOpenQuickProduct(searchInput)}
-                          className="underline font-bold text-teal-300 hover:text-white cursor-pointer ml-2 shrink-0"
-                        >
-                          + Quick Add
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Dropdown Suggestions */}
-                  {showSearchDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-72 overflow-y-auto">
-                      {isSearchingProduct && searchResults.length === 0 ? (
-                        <div className="p-4 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                          <Loader2 className="w-4 h-4 text-teal-400 animate-spin" />
-                          <span>Searching catalog database...</span>
-                        </div>
-                      ) : searchResults.length > 0 ? (
-                        <div>
-                          <div className="px-3 py-1.5 bg-slate-950/80 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800 flex justify-between">
-                            <span>Catalog Matches ({searchResults.length})</span>
-                            <span>Click to add item</span>
-                          </div>
-                          {searchResults.map((p) => (
-                            <button
-                              key={p.id}
-                              type="button"
-                              onClick={() => addProductToDraft(p)}
-                              className="w-full text-left px-3 py-2.5 hover:bg-slate-800 transition flex items-center justify-between border-b border-slate-800/60 last:border-0 cursor-pointer"
-                            >
-                              <div className="pr-2">
-                                <div className="text-xs font-semibold text-white flex items-center gap-2">
-                                  <span>{p.name}</span>
-                                  {p.is_in_inventory === 1 ? (
-                                    <span className="text-[9px] font-normal px-1.5 py-0.2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
-                                      In Stock: {p.stock_quantity || 0}
-                                    </span>
-                                  ) : (
-                                    <span className="text-[9px] font-normal px-1.5 py-0.2 bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded">
-                                      Catalog Only
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">
-                                  <span>GTIN/Barcode: <strong className="text-teal-300">{p.barcode || '—'}</strong></span>
-                                  {p.sku && p.sku !== p.barcode && <span>• SKU: {p.sku}</span>}
-                                  {p.brand && <span>• {p.brand}</span>}
-                                </div>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <div className="text-xs font-bold text-teal-400 font-mono">
-                                  Cost: {currency}{Number(p.cost_price || 0).toFixed(2)}
-                                </div>
-                                <div className="text-[10px] text-slate-400 font-mono">
-                                  Sell: {currency}{Number(p.selling_price || 0).toFixed(2)}
-                                </div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        searchInput.trim().length > 0 && !isSearchingProduct && (
-                          <div className="p-4 text-center">
-                            <AlertCircle className="w-6 h-6 text-amber-400 mx-auto mb-1.5" />
-                            <div className="text-xs font-semibold text-white">
-                              No product found for "{searchInput}"
-                            </div>
-                            <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
-                              This barcode / GTIN is not registered in the Master Product Catalog yet.
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenQuickProduct(searchInput)}
-                              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold rounded-lg text-xs shadow-md transition cursor-pointer"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Register Product with this Barcode</span>
-                            </button>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Items Table */}
-              {draftItems.length === 0 ? (
-                <div className="py-12 text-center text-slate-500 border-2 border-dashed border-slate-800 rounded-xl">
-                  <Package className="w-10 h-10 mx-auto text-slate-600 mb-2" />
-                  <p className="text-sm font-semibold text-slate-400">No items added to this GRN yet</p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Scan a product barcode or use the search bar above to start building the delivery list.
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto border border-slate-800 rounded-xl">
-                  <table className="w-full min-w-[850px] text-left text-xs">
-                    <thead className="bg-[#0f172a] text-slate-400 border-b border-slate-800 font-semibold uppercase tracking-wider text-[10px]">
-                      <tr>
-                        <th className="py-3 px-3 w-8">#</th>
-                        <th className="py-3 px-3 min-w-[200px]">Product & Barcode</th>
-                        <th className="py-3 px-3 min-w-[120px]">Batch #</th>
-                        <th className="py-3 px-3 min-w-[120px]">Expiry</th>
-                        <th className="py-3 px-3 min-w-[80px]">Location</th>
-                        <th className="py-3 px-3 min-w-[90px] text-right">Qty Received</th>
-                        <th className="py-3 px-3 min-w-[90px] text-right">Cost Price</th>
-                        <th className="py-3 px-3 min-w-[90px] text-right">Selling Price</th>
-                        <th className="py-3 px-3 min-w-[90px] text-right">MRP (Actual)</th>
-                        <th className="py-3 px-3 min-w-[100px] text-right">Total Cost</th>
-                        <th className="py-3 px-3 w-10 text-center"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/80">
-                      {draftItems.map((item, idx) => {
-                        const rowQty = Number(item.quantity_received) || 0;
-                        const rowCost = Number(item.cost_price) || 0;
-                        const rowSubtotal = rowQty * rowCost;
-
-                        return (
-                          <tr key={idx} className="hover:bg-slate-900/50 transition">
-                            <td className="py-2.5 px-3 text-slate-500 font-mono">{idx + 1}</td>
-                            
-                            {/* Product Info */}
-                            <td className="py-2.5 px-3">
-                              <div className="font-semibold text-white">{item.product_name}</div>
-                              <div className="text-[10px] text-slate-400 font-mono">{item.barcode}</div>
-                            </td>
-
-                            {/* Batch Number */}
-                            <td className="py-2.5 px-3">
-                              <input
-                                type="text"
-                                value={item.batch_number}
-                                onChange={(e) => updateDraftItem(idx, 'batch_number', e.target.value)}
-                                placeholder="Batch #"
-                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:border-teal-500 outline-hidden font-mono"
-                              />
-                            </td>
-
-                            {/* Expiry Date */}
-                            <td className="py-2.5 px-3">
-                              <input
-                                type="date"
-                                value={item.expiry_date}
-                                onChange={(e) => updateDraftItem(idx, 'expiry_date', e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white focus:border-teal-500 outline-hidden font-mono"
-                              />
-                            </td>
-
-                            {/* Shelf Location */}
-                            <td className="py-2.5 px-3">
-                              <input
-                                type="text"
-                                value={item.shelf_location}
-                                onChange={(e) => updateDraftItem(idx, 'shelf_location', e.target.value)}
-                                placeholder="Rack / Shelf"
-                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:border-teal-500 outline-hidden"
-                              />
-                            </td>
-
-                            {/* Quantity Received */}
-                            <td className="py-2.5 px-3 text-right">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0.01"
-                                value={item.quantity_received}
-                                onFocus={(e) => e.target.select()}
-                                onChange={(e) => updateDraftItem(idx, 'quantity_received', e.target.value)}
-                                required
-                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-teal-400 focus:border-teal-500 outline-hidden font-mono"
-                              />
-                            </td>
-
-                            {/* Unit Cost Price */}
-                            <td className="py-2.5 px-3 text-right">
-                              <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={item.cost_price}
-                                onFocus={(e) => e.target.select()}
-                                onChange={(e) => updateDraftItem(idx, 'cost_price', e.target.value)}
-                                required
-                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-white focus:border-teal-500 outline-hidden"
-                              />
-                            </td>
-
-                            {/* Selling Price */}
-                            <td className="py-2.5 px-3 text-right">
-                              <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={item.selling_price}
-                                onFocus={(e) => e.target.select()}
-                                onChange={(e) => updateDraftItem(idx, 'selling_price', e.target.value)}
-                                required
-                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-emerald-400 focus:border-teal-500 outline-hidden"
-                              />
-                            </td>
-
-                            {/* MRP */}
-                            <td className="py-2.5 px-3 text-right">
-                              <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={item.mrp}
-                                onFocus={(e) => e.target.select()}
-                                onChange={(e) => updateDraftItem(idx, 'mrp', e.target.value)}
-                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-amber-300 focus:border-teal-500 outline-hidden"
-                              />
-                            </td>
-
-                            {/* Line Total */}
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-white">
-                              {currency}{rowSubtotal.toFixed(2)}
-                            </td>
-
-                            {/* Delete Action */}
-                            <td className="py-2.5 px-3 text-center">
-                              <button
-                                type="button"
-                                onClick={() => removeDraftItem(idx)}
-                                className="text-slate-500 hover:text-rose-400 transition cursor-pointer p-1"
-                                title="Remove line item"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* Bottom Summary Bar */}
-              {draftItems.length > 0 && (
-                <div className="pt-4 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs text-slate-400">
-                    <div>
-                      Distinct Items: <strong className="text-white font-mono">{draftItems.length}</strong>
-                    </div>
-                    <div>
-                      Total Units: <strong className="text-teal-400 font-mono">{totalUnits}</strong>
-                    </div>
-                    <div>
-                      Total Inward Spend:{' '}
-                      <strong className="text-white text-sm font-mono font-bold">
-                        {currency}{totalCost.toFixed(2)}
-                      </strong>
-                    </div>
-                    <div>
-                      Est. Margin:{' '}
-                      <strong className="text-emerald-400 font-mono">
-                        +{estMargin.toFixed(1)}%
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-                    <button
-                      type="button"
-                      onClick={clearDraft}
-                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition cursor-pointer"
-                    >
-                      Clear List
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-teal-900/30 flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <span>Processing & Updating Inventory...</span>
-                      ) : (
-                        <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Process GRN & Update Inventory</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </form>
-        ) : (
-          /* TAB 2: GRN HISTORY & PAYMENTS */
-          <div className="space-y-4 max-w-7xl mx-auto">
+        {/* GRN HISTORY & DELIVERIES TABLE */}
+        <div className="space-y-4 max-w-7xl mx-auto">
             {/* Filter Bar & Payment Status Chips */}
             <div className="bg-[#0b1322] border border-slate-800 rounded-2xl p-4 space-y-3">
               <div className="flex flex-col md:flex-row items-center justify-between gap-3">
@@ -1792,8 +1262,680 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
+
+      
+      {/* ── STOCK RECEIVING (GRN) POPUP MODAL ── */}
+      {isCreateGrnModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-[#0b1322] border-2 border-teal-500/40 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden my-4 max-h-[94vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
+                  <ClipboardCheck className="w-6 h-6 stroke-[2.25]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-extrabold text-white">
+                      Stock Receiving (GRN)
+                    </h3>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700">
+                      Inward Delivery
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Receive incoming supplier deliveries, verify quantities & prices, and update store inventory.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {draftItems.length > 0 && (
+                  <span className="px-3 py-1 rounded-xl bg-teal-950 text-teal-300 border border-teal-700 text-xs font-mono font-bold">
+                    {draftItems.length} items ({totalUnits} units)
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsCreateGrnModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: Complete Form */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+              <form onSubmit={handleProcessGRN} className="space-y-3.5 max-w-7xl mx-auto">
+
+            {/* ==================== SECTION 1: DELIVERY & SUPPLIER INFORMATION ==================== */}
+            <div className="grn-section-card rounded-2xl overflow-hidden">
+              {/* Genuine Section 1 Header */}
+              <div className="grn-section-header-1 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="grn-step-badge-1 w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center shadow-xs">
+                    1
+                  </div>
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    <h2 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+                      <Building2 className="w-4 h-4 text-slate-700" />
+                      <span>1. Delivery & Supplier Information</span>
+                    </h2>
+                    <span className="text-[11px] text-slate-500 hidden md:inline">
+                      — Supplier details, invoice number & payment schedule
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSupplierModalTab('manage');
+                      setIsAddSupplierOpen(true);
+                    }}
+                    className="px-3 py-1 rounded-lg bg-emerald-50 border border-slate-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                    <span>Manage Suppliers</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSupplierModalTab('add');
+                      setIsAddSupplierOpen(true);
+                    }}
+                    className="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-700 transition shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>New Supplier</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Compact 2-Row Section 1 Body */}
+              <div className="p-4 space-y-3">
+                {/* Row 1: Supplier, Invoice #, Date, Staff */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
+                  {/* Supplier Picker (5 cols) */}
+                  <div className="lg:col-span-5">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      Supplier / Vendor <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={selectedSupplierId}
+                        onChange={(e) => setSelectedSupplierId(e.target.value)}
+                        className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden font-medium"
+                      >
+                        {(suppliers || []).map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} {s.contact_name ? `(${s.contact_name})` : ''}
+                          </option>
+                        ))}
+                        <option value="custom">+ Other / Direct Van Distributor</option>
+                      </select>
+                      {selectedSupplierId === 'custom' && (
+                        <input
+                          type="text"
+                          placeholder="Custom supplier name..."
+                          value={customSupplierName}
+                          onChange={(e) => setCustomSupplierName(e.target.value)}
+                          required
+                          className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Supplier Invoice / Bill # (3 cols) */}
+                  <div className="lg:col-span-3">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      Supplier Bill / Invoice #
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. INV-98124"
+                      value={invoiceNumber}
+                      onChange={(e) => setInvoiceNumber(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden"
+                    />
+                  </div>
+
+                  {/* Delivery Date (2 cols) */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      Received Date
+                    </label>
+                    <input
+                      type="date"
+                      value={receivedDate}
+                      onChange={(e) => setReceivedDate(e.target.value)}
+                      required
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden"
+                    />
+                  </div>
+
+                  {/* Received By Staff (2 cols) */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      Receiver / Staff
+                    </label>
+                    <input
+                      type="text"
+                      value={receivedByName}
+                      onChange={(e) => setReceivedByName(e.target.value)}
+                      required
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Payment Terms & Delivery Notes in one clean bar */}
+                <div className="grn-payment-subbox p-3 rounded-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+                  {/* Payment Method Selector (3 cols) */}
+                  <div className="lg:col-span-3">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      Payment Method
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-700">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('cash')}
+                        className={`py-1.5 text-xs font-extrabold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                          paymentMethod === 'cash'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-emerald-50 text-slate-600 hover:bg-emerald-100'
+                        }`}
+                      >
+                        <Banknote className="w-3.5 h-3.5" />
+                        <span>Cash</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('cheque')}
+                        className={`py-1.5 text-xs font-extrabold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                          paymentMethod === 'cheque'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-emerald-50 text-slate-600 hover:bg-emerald-100'
+                        }`}
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Cheque</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Settlement Status (3 cols) */}
+                  <div className="lg:col-span-3">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      Settlement Status
+                    </label>
+                    <select
+                      value={paymentOption}
+                      onChange={(e: any) => setPaymentOption(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden font-medium"
+                    >
+                      <option value="credit">Credit Delivery (Pay on Due Date)</option>
+                      <option value="full">Paid in Full Upon Delivery</option>
+                      <option value="partial">Partial Paid Upon Delivery</option>
+                    </select>
+                  </div>
+
+                  {/* Payment Due Date (3 cols) */}
+                  <div className="lg:col-span-3">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      {paymentOption === 'full' ? 'Settled Date' : 'Payment Due Date'}
+                      {paymentOption !== 'full' && <span className="text-amber-400 ml-1">(Reminder)</span>}
+                    </label>
+                    <input
+                      type="date"
+                      value={paymentDueDate}
+                      onChange={(e) => setPaymentDueDate(e.target.value)}
+                      required={paymentOption !== 'full'}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden font-mono"
+                    />
+                  </div>
+
+                  {/* Delivery Notes (3 cols) */}
+                  <div className="lg:col-span-3">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                      Delivery Notes / Remarks
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Optional delivery notes..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden"
+                    />
+                  </div>
+
+                  {/* Upfront Amount (if partial) */}
+                  {paymentOption === 'partial' && (
+                    <div className="lg:col-span-4">
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                        Amount Paid Now ({currency}) <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="e.g. 5000"
+                        value={upfrontPaidAmount}
+                        onChange={(e) => setUpfrontPaidAmount(e.target.value)}
+                        required
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-emerald-400 font-bold focus:border-teal-500 outline-hidden font-mono"
+                      />
+                    </div>
+                  )}
+
+                  {/* Cheque Details (if Cheque selected) */}
+                  {paymentMethod === 'cheque' && (
+                    <>
+                      <div className="lg:col-span-4">
+                        <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                          Cheque # / Ref
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. CHQ-928104"
+                          value={chequeNumber}
+                          onChange={(e) => setChequeNumber(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden font-mono"
+                        />
+                      </div>
+                      <div className="lg:col-span-4">
+                        <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                          Cheque Date
+                        </label>
+                        <input
+                          type="date"
+                          value={chequeDate}
+                          onChange={(e) => setChequeDate(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:border-teal-500 outline-hidden font-mono"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ==================== SECTION 2: ADD INCOMING DELIVERY ITEMS ==================== */}
+            <div className="grn-section-card rounded-2xl overflow-hidden">
+              {/* Genuine Section 2 Header */}
+              <div className="grn-section-header-2 px-5 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="grn-step-badge-2 w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center shadow-xs">
+                    2
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Package className="w-4 h-4 text-emerald-600" />
+                    <h2 className="text-sm sm:text-base font-extrabold text-slate-900">
+                      2. Add Incoming Delivery Items
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-500 text-white">
+                      {draftItems.length} items
+                    </span>
+                  </div>
+                </div>
+
+                {/* Item Search & Barcode Scanner */}
+                <div ref={searchContainerRef} className="relative w-full lg:w-[480px]">
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Scan barcode / GTIN or search 9,500+ items in catalog..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleBarcodeScanOrSubmit();
+                        } else if (e.key === 'Escape') {
+                          setShowSearchDropdown(false);
+                        }
+                      }}
+                      onFocus={() => {
+                        if (searchResults.length > 0 || searchInput.trim().length > 0) {
+                          setShowSearchDropdown(true);
+                        }
+                      }}
+                      className="w-full bg-slate-950 border-2 border-emerald-500 rounded-xl pl-10 pr-16 py-2 text-xs sm:text-sm text-white focus:border-emerald-600 outline-hidden font-sans shadow-xs"
+                    />
+                    <div className="absolute right-3 top-2 flex items-center gap-1">
+                      {isSearchingProduct ? (
+                        <Loader2 className="w-4 h-4 text-teal-400 animate-spin" />
+                      ) : searchInput.trim().length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => handleBarcodeScanOrSubmit()}
+                          className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded transition cursor-pointer"
+                          title="Lookup Barcode / GTIN (Enter)"
+                        >
+                          Enter ↵
+                        </button>
+                      ) : (
+                        <Barcode className="w-4 h-4 text-slate-500" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Real-time Status / Feedback Alert */}
+                  {searchFeedback && (
+                    <div
+                      className={`mt-1.5 px-3 py-1.5 rounded-lg text-xs flex items-center justify-between transition ${
+                        searchFeedback.type === 'success'
+                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80'
+                          : searchFeedback.type === 'error'
+                          ? 'bg-rose-950/80 text-rose-300 border border-rose-800/80'
+                          : 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {searchFeedback.type === 'success' && <Check className="w-3.5 h-3.5 shrink-0" />}
+                        {searchFeedback.type === 'error' && <AlertCircle className="w-3.5 h-3.5 shrink-0" />}
+                        <span>{searchFeedback.message}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dropdown Suggestions */}
+                  {showSearchDropdown && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-72 overflow-y-auto">
+                      {isSearchingProduct && searchResults.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 text-teal-400 animate-spin" />
+                          <span>Searching catalog database...</span>
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        <div>
+                          <div className="px-3 py-1.5 bg-slate-950/80 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800 flex justify-between">
+                            <span>Catalog Matches ({searchResults.length})</span>
+                            <span>Click to add item</span>
+                          </div>
+                          {searchResults.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => addProductToDraft(p)}
+                              className="w-full text-left px-3 py-2.5 hover:bg-slate-800 transition flex items-center justify-between border-b border-slate-800/60 last:border-0 cursor-pointer"
+                            >
+                              <div className="pr-2">
+                                <div className="text-xs font-semibold text-white flex items-center gap-2">
+                                  <span>{p.name}</span>
+                                  {p.is_in_inventory === 1 ? (
+                                    <span className="text-[9px] font-normal px-1.5 py-0.2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
+                                      In Stock: {p.stock_quantity || 0}
+                                    </span>
+                                  ) : (
+                                    <span className="text-[9px] font-normal px-1.5 py-0.2 bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded">
+                                      Catalog Only
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">
+                                  <span>GTIN/Barcode: <strong className="text-teal-300">{p.barcode || '—'}</strong></span>
+                                  {p.sku && p.sku !== p.barcode && <span>• SKU: {p.sku}</span>}
+                                  {p.brand && <span>• {p.brand}</span>}
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <div className="text-xs font-bold text-teal-400 font-mono">
+                                  Cost: {currency}{Number(p.cost_price || 0).toFixed(2)}
+                                </div>
+                                <div className="text-[10px] text-slate-400 font-mono">
+                                  Sell: {currency}{Number(p.selling_price || 0).toFixed(2)}
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        searchInput.trim().length > 0 && !isSearchingProduct && (
+                          <div className="p-4 text-center">
+                            <AlertCircle className="w-6 h-6 text-amber-400 mx-auto mb-1.5" />
+                            <div className="text-xs font-semibold text-white">
+                              No product found for "{searchInput}"
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
+                              Use the "+ Add New Product" box at the top to register this barcode into the catalog.
+                            </p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 2 Body: Items Table */}
+              <div className="p-4">
+              {draftItems.length === 0 ? (
+                <div className="py-6 px-4 text-center text-slate-500 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center bg-slate-900/50">
+                  <Package className="w-8 h-8 mx-auto text-emerald-600 mb-1.5" />
+                  <p className="text-xs sm:text-sm font-extrabold text-slate-700">No items added to this delivery list yet</p>
+                  <p className="text-xs text-slate-500 mt-0.5 max-w-md">
+                    Scan a product barcode or search in the box above to add received stock quantities.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-slate-800 rounded-xl">
+                  <table className="w-full min-w-[850px] text-left text-xs">
+                    <thead className="bg-[#0f172a] text-slate-400 border-b border-slate-800 font-semibold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-3 px-3 w-8">#</th>
+                        <th className="py-3 px-3 min-w-[200px]">Product & Barcode</th>
+                        <th className="py-3 px-3 min-w-[120px]">Batch #</th>
+                        <th className="py-3 px-3 min-w-[120px]">Expiry</th>
+                        <th className="py-3 px-3 min-w-[80px]">Location</th>
+                        <th className="py-3 px-3 min-w-[90px] text-right">Qty Received</th>
+                        <th className="py-3 px-3 min-w-[90px] text-right">Cost Price</th>
+                        <th className="py-3 px-3 min-w-[90px] text-right">Selling Price</th>
+                        <th className="py-3 px-3 min-w-[90px] text-right">MRP (Actual)</th>
+                        <th className="py-3 px-3 min-w-[100px] text-right">Total Cost</th>
+                        <th className="py-3 px-3 w-10 text-center"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/80">
+                      {draftItems.map((item, idx) => {
+                        const rowQty = Number(item.quantity_received) || 0;
+                        const rowCost = Number(item.cost_price) || 0;
+                        const rowSubtotal = rowQty * rowCost;
+
+                        return (
+                          <tr key={idx} className="hover:bg-slate-900/50 transition">
+                            <td className="py-2.5 px-3 text-slate-500 font-mono">{idx + 1}</td>
+                            
+                            {/* Product Info */}
+                            <td className="py-2.5 px-3">
+                              <div className="font-semibold text-white">{item.product_name}</div>
+                              <div className="text-[10px] text-slate-400 font-mono">{item.barcode}</div>
+                            </td>
+
+                            {/* Batch Number */}
+                            <td className="py-2.5 px-3">
+                              <input
+                                type="text"
+                                value={item.batch_number}
+                                onChange={(e) => updateDraftItem(idx, 'batch_number', e.target.value)}
+                                placeholder="Batch #"
+                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:border-teal-500 outline-hidden font-mono"
+                              />
+                            </td>
+
+                            {/* Expiry Date */}
+                            <td className="py-2.5 px-3">
+                              <input
+                                type="date"
+                                value={item.expiry_date}
+                                onChange={(e) => updateDraftItem(idx, 'expiry_date', e.target.value)}
+                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white focus:border-teal-500 outline-hidden font-mono"
+                              />
+                            </td>
+
+                            {/* Shelf Location */}
+                            <td className="py-2.5 px-3">
+                              <input
+                                type="text"
+                                value={item.shelf_location}
+                                onChange={(e) => updateDraftItem(idx, 'shelf_location', e.target.value)}
+                                placeholder="Rack / Shelf"
+                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:border-teal-500 outline-hidden"
+                              />
+                            </td>
+
+                            {/* Quantity Received */}
+                            <td className="py-2.5 px-3 text-right">
+                              <input
+                                type="number"
+                                step="any"
+                                min="0.01"
+                                value={item.quantity_received}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => updateDraftItem(idx, 'quantity_received', e.target.value)}
+                                required
+                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-teal-400 focus:border-teal-500 outline-hidden font-mono"
+                              />
+                            </td>
+
+                            {/* Unit Cost Price */}
+                            <td className="py-2.5 px-3 text-right">
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={item.cost_price}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => updateDraftItem(idx, 'cost_price', e.target.value)}
+                                required
+                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-white focus:border-teal-500 outline-hidden"
+                              />
+                            </td>
+
+                            {/* Selling Price */}
+                            <td className="py-2.5 px-3 text-right">
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={item.selling_price}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => updateDraftItem(idx, 'selling_price', e.target.value)}
+                                required
+                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-emerald-400 focus:border-teal-500 outline-hidden"
+                              />
+                            </td>
+
+                            {/* MRP */}
+                            <td className="py-2.5 px-3 text-right">
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={item.mrp}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => updateDraftItem(idx, 'mrp', e.target.value)}
+                                className="w-20 text-right bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-amber-300 focus:border-teal-500 outline-hidden"
+                              />
+                            </td>
+
+                            {/* Line Total */}
+                            <td className="py-2.5 px-3 text-right font-mono font-bold text-white">
+                              {currency}{rowSubtotal.toFixed(2)}
+                            </td>
+
+                            {/* Delete Action */}
+                            <td className="py-2.5 px-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => removeDraftItem(idx)}
+                                className="text-slate-500 hover:text-rose-400 transition cursor-pointer p-1"
+                                title="Remove line item"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Bottom Summary Bar */}
+              {draftItems.length > 0 && (
+                <div className="pt-4 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs text-slate-400">
+                    <div>
+                      Distinct Items: <strong className="text-white font-mono">{draftItems.length}</strong>
+                    </div>
+                    <div>
+                      Total Units: <strong className="text-teal-400 font-mono">{totalUnits}</strong>
+                    </div>
+                    <div>
+                      Total Inward Spend:{' '}
+                      <strong className="text-white text-sm font-mono font-bold">
+                        {currency}{totalCost.toFixed(2)}
+                      </strong>
+                    </div>
+                    <div>
+                      Est. Margin:{' '}
+                      <strong className="text-emerald-400 font-mono">
+                        +{estMargin.toFixed(1)}%
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setIsCreateGrnModalOpen(false)}
+                      className="btn-cancel-red px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-sm shadow-rose-900/20 flex items-center gap-1.5"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Cancel</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearDraft}
+                      className="btn-cancel-red px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Clear List</span>
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="btn-save-green px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-900/30 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <span>Processing & Updating Inventory...</span>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Process GRN & Update Inventory</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+              </div>
+            </div>
+          </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* QUICK SUPPLIER MODAL */}
       {isAddSupplierOpen && (
@@ -1881,15 +2023,17 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                   <button
                     type="button"
                     onClick={() => setIsAddSupplierOpen(false)}
-                    className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
+                    className="btn-cancel-red px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-xs flex items-center gap-1.5"
                   >
-                    Cancel
+                    <X className="w-3.5 h-3.5" />
+                    <span>Cancel</span>
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
+                    className="btn-save-green px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs cursor-pointer transition shadow-xs flex items-center gap-1.5"
                   >
-                    Save Supplier
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Save Supplier</span>
                   </button>
                 </div>
               </form>
@@ -2100,25 +2244,28 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
 
       {/* QUICK NEW PRODUCT REGISTRATION MODAL */}
       {isQuickProductOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-[#0b1322] border-2 border-emerald-500/40 rounded-3xl w-full max-w-2xl p-6 shadow-2xl space-y-4 my-6">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-teal-400" />
-                <h3 className="text-base font-bold text-white">Quick Register New Product</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <Plus className="w-6 h-6 stroke-[2.75]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-white">Register New Product to Master Catalog</h3>
+                  <p className="text-xs text-slate-400">
+                    Register product details & initial stock. Immediately available in POS, Inventory & GRN.
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsQuickProductOpen(false)}
-                className="p-1 text-slate-400 hover:text-white transition cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-
-            <p className="text-xs text-slate-400">
-              Register this item to the Master Catalog. It will immediately be added to your current delivery list.
-            </p>
 
             <form onSubmit={handleSaveQuickProduct} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
@@ -2154,7 +2301,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                       setQuickProductForm({
                         ...quickProductForm,
                         barcode: e.target.value,
-                        sku: quickProductForm.sku === quickProductForm.barcode ? e.target.value : (quickProductForm.sku || e.target.value),
+                        sku: e.target.value,
                       })
                     }
                     placeholder={`e.g. ${suggestedBarcode || '1000030'}`}
@@ -2166,17 +2313,19 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">SKU</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Quantity (Initial Stock)</label>
                   <input
-                    type="text"
-                    value={quickProductForm.sku}
+                    type="number"
+                    step="1"
+                    min="0"
+                    value={quickProductForm.stock_quantity}
                     onFocus={(e) => e.target.select()}
-                    onChange={(e) => setQuickProductForm({ ...quickProductForm, sku: e.target.value })}
-                    placeholder="Auto or SKU"
+                    onChange={(e) => setQuickProductForm({ ...quickProductForm, stock_quantity: e.target.value })}
+                    placeholder="0"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-teal-500 outline-hidden font-mono"
                   />
                   <p className="text-[10px] text-slate-500 mt-1">
-                    Internal part number / SKU code.
+                    Initial stock quantity to add into inventory.
                   </p>
                 </div>
               </div>
@@ -2304,16 +2453,17 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                 <button
                   type="button"
                   onClick={() => setIsQuickProductOpen(false)}
-                  className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-700 transition cursor-pointer"
+                  className="btn-cancel-red px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md shadow-rose-900/20 flex items-center gap-1.5"
                 >
-                  Cancel
+                  <X className="w-4 h-4" />
+                  <span>Cancel</span>
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition cursor-pointer flex items-center gap-1.5"
+                  className="btn-save-green px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-900/30 transition cursor-pointer flex items-center gap-1.5"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>Save & Add to GRN</span>
+                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  <span>Add New Product & Save</span>
                 </button>
               </div>
             </form>
@@ -2585,15 +2735,16 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                 <button
                   type="button"
                   onClick={() => setIsPaymentModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition cursor-pointer"
+                  className="btn-cancel-red px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                 >
-                  Close
+                  <X className="w-3.5 h-3.5" />
+                  <span>Close</span>
                 </button>
                 <button
                   type="submit"
                   form="record-payment-form"
                   disabled={isRecordingPayment || balance <= 0}
-                  className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-teal-500/20 transition cursor-pointer flex items-center gap-2"
+                  className="btn-save-green px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-900/30 transition cursor-pointer flex items-center gap-2"
                 >
                   {isRecordingPayment ? (
                     <>

@@ -7,20 +7,24 @@
   body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #070b13;
     color: #f8fafc;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 /* ========================================================================== */
-/* MODERN MINIMALIST CLEAN LIGHT THEME (Shopify / Square POS Style)            */
-/* Activated via .theme-light on root HTML                                    */
+/* FRESH LIGHT WHITE & EMERALD GREEN POS THEME                                */
+/* Activated via .theme-light on root HTML (Default Theme)                    */
+/*                                                                            */
 /* Palette:                                                                   */
-/* Background: Soft Off-White (#f8fafc / #f1f5f9)                             */
-/* Cards & Tables: Pure White (#ffffff) with soft borders (#e2e8f0)            */
-/* Text & Typography: Deep Charcoal / Slate 900 (#0f172a / #1e293b)           */
+/* - Workspace Canvas: Soft Mint-White (#f3f8f5)                              */
+/* - Primary Cards & Sidebar: Pure Crisp White (#ffffff)                      */
+/* - Sub-panels & Table Headers: Fresh Mint Tint (#ecfdf5 / #f6fbf8)          */
+/* - Buttons: Bright Pleasant Emerald (#10b981), Teal (#14b8a6),              */
+/*   Sky Blue (#3b82f6), Violet (#8b5cf6), Amber (#f59e0b), Coral (#ef4444)   */
 /* ========================================================================== */
 
 .theme-light body {
@@ -28,69 +32,166 @@
   color: #0f172a !important;
 }
 
-/* Shell & Workspace Backgrounds */
+/* 1. Keep buttons clearly visible (no washed-out disabled transparency) */
+.theme-light button:disabled,
+.theme-light .disabled\:opacity-25:disabled,
+.theme-light .disabled\:opacity-30:disabled,
+.theme-light .disabled\:opacity-40:disabled,
+.theme-light .disabled\:opacity-45:disabled,
+.theme-light .disabled\:opacity-50:disabled {
+  opacity: 0.92 !important;
+}
+
+/* 2. Main Shell & Workspace Canvas */
 .theme-light .bg-\[\#070b13\],
-.theme-light .bg-\[\#090e18\],
 .theme-light .bg-slate-950,
-.theme-light .bg-slate-900,
 .theme-light main {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Right Order Summary Panel & Left Persistent Sidebar: Modern Soft Emerald-Mint & Slate Shaded Side Panels */
+.theme-light aside,
+.theme-light .lg\:flex.bg-\[\#070b13\] {
+  background: linear-gradient(180deg, #d1fae5 0%, #ecfdf5 52%, #e2e8f0 100%) !important;
+  border-color: #6ee7b7 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 24px rgba(16, 185, 129, 0.1) !important;
+}
+
+.theme-light header {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Inner Cards inside the Colored Right Order Summary Side Panel & Sidebar Footer: Crisp Pure White */
+.theme-light .lg\:flex.bg-\[\#070b13\] div.bg-\[\#0a101d\],
+.theme-light .lg\:flex.bg-\[\#070b13\] div.bg-\[\#090e18\]:not(.pos-grand-total-card),
+.theme-light aside div.bg-slate-800\/90,
+.theme-light aside div.bg-slate-800\/60 {
+  background: #ffffff !important;
+  border-color: #a7f3d0 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.07) !important;
+}
+
+.theme-light aside div.bg-slate-950\/40 {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-color: #a7f3d0 !important;
+}
+
+/* 3. Primary Cards, Modals & Containers (Pure White) */
+.theme-light div.bg-\[\#0b101b\],
+.theme-light div.bg-\[\#0b1222\],
+.theme-light div.bg-\[\#0b1322\],
+.theme-light div.bg-\[\#0a101f\],
+.theme-light div.bg-\[\#0d1527\]\/90,
+.theme-light div.bg-\[\#0d1424\],
+.theme-light div.bg-\[\#080d1a\],
+.theme-light div.bg-\[\#0f172a\],
+.theme-light div.bg-slate-900:not(aside),
+.theme-light div.bg-slate-850 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 18px -4px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* 4. Card Headers, Dock Bars, Loyalty Box & Soft Sub-Panels (Soft Cool Slate Tint) */
+.theme-light div.bg-\[\#090e18\],
+.theme-light div.bg-\[\#090f1a\],
+.theme-light div.bg-\[\#0a101d\],
+.theme-light div.bg-\[\#0e1626\],
+.theme-light div.bg-slate-950\/40,
+.theme-light div.bg-slate-950\/50,
+.theme-light div.bg-slate-950\/60,
+.theme-light div.bg-slate-950\/70,
+.theme-light div.bg-slate-800,
+.theme-light div.bg-slate-800\/90,
+.theme-light div.bg-slate-800\/80,
+.theme-light div.bg-slate-800\/60,
+.theme-light div.bg-slate-800\/50,
+.theme-light div.bg-slate-800\/40,
+.theme-light div.bg-slate-900\/80,
+.theme-light div.bg-slate-900\/60,
+.theme-light div.bg-slate-900\/50 {
   background-color: #f8fafc !important;
   color: #0f172a !important;
 }
 
-/* Secondary Panels, Navbars & Cards */
-.theme-light aside,
-.theme-light header,
-.theme-light .bg-\[\#0b101b\],
-.theme-light .bg-\[\#0b1322\],
-.theme-light .bg-\[\#0a101f\],
-.theme-light .bg-\[\#0d1527\]\/90,
-.theme-light .bg-\[\#0d1424\],
-.theme-light .bg-\[\#0e1626\],
-.theme-light .bg-\[\#121a28\],
-.theme-light .bg-slate-850 {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+/* Customer Loyalty Box in Order Summary */
+.theme-light div.bg-\[\#0a101d\].border-\[\#16233b\] {
+  background: #ffffff !important;
+  border-color: #a7f3d0 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.07) !important;
 }
 
-/* Soft Sub-panels & Rows */
-.theme-light .bg-slate-800,
-.theme-light .bg-slate-800\/90,
-.theme-light .bg-slate-800\/80,
-.theme-light .bg-slate-800\/60,
-.theme-light .bg-slate-800\/50,
-.theme-light .bg-slate-800\/40,
-.theme-light .bg-slate-900\/80,
-.theme-light .bg-slate-900\/60,
-.theme-light .bg-slate-900\/50,
-.theme-light .bg-slate-950\/70,
-.theme-light .bg-slate-950\/60,
-.theme-light .bg-slate-950\/50,
-.theme-light .bg-slate-950\/40,
-.theme-light .bg-\[\#070b13\]\/90,
-.theme-light .bg-\[\#111928\]\/60 {
-  background-color: #f1f5f9 !important;
-  color: #1e293b !important;
+/* Wholesale Terminal Banner & Launchpad Color Cards - Bright Gradients with White Text */
+.theme-light .wholesale-banner {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border-color: #34d399 !important;
+  color: #ffffff !important;
+}
+.theme-light .wholesale-banner *,
+.theme-light .wholesale-banner span,
+.theme-light .hub-color-card,
+.theme-light .hub-color-card *,
+.theme-light .hub-color-card span,
+.theme-light .hub-color-card h3,
+.theme-light .hub-color-card svg,
+.theme-light div.bg-emerald-500,
+.theme-light div.bg-emerald-500 *,
+.theme-light span.bg-emerald-500,
+.theme-light span.bg-emerald-500 *,
+.theme-light span.bg-rose-500,
+.theme-light span.bg-rose-600,
+.theme-light span.bg-amber-500,
+.theme-light span.bg-blue-500 {
+  color: #ffffff !important;
 }
 
-/* Borders in Light Mode */
-.theme-light .border-\[\#162135\],
-.theme-light .border-\[\#1b283f\],
+/* Shift Notice Banner - Soft Warm Amber Card */
+.theme-light div.bg-amber-500\/10 {
+  background-color: #fffbeb !important;
+  border-color: #fcd34d !important;
+  color: #92400e !important;
+}
+.theme-light div.bg-amber-500\/10 span,
+.theme-light div.bg-amber-500\/10 strong,
+.theme-light div.bg-amber-500\/10 svg {
+  color: #92400e !important;
+}
+
+/* 5. Soft Clean Genuine Slate Borders & Dividers */
 .theme-light .border-\[\#152033\],
-.theme-light .border-\[\#1e2a40\],
+.theme-light .border-\[\#162135\],
 .theme-light .border-\[\#16233b\],
+.theme-light .border-\[\#18253b\],
+.theme-light .border-\[\#1b283f\],
+.theme-light .border-\[\#1c2a42\],
+.theme-light .border-\[\#1d2d46\],
+.theme-light .border-\[\#1e2a40\],
+.theme-light .border-\[\#1e2c44\],
+.theme-light .border-\[\#1f2e47\],
+.theme-light .border-\[\#1f2e48\],
 .theme-light .border-slate-800,
+.theme-light .border-slate-800\/80,
 .theme-light .border-slate-750,
 .theme-light .border-slate-700,
+.theme-light .border-slate-700\/80,
+.theme-light .border-slate-700\/60,
 .theme-light .divide-\[\#152033\],
 .theme-light .divide-\[\#162135\],
 .theme-light .divide-slate-800 {
   border-color: #e2e8f0 !important;
 }
 
-/* Typography Overrides */
-.theme-light .text-white {
+/* 6. Clear Readable Typography on White Cards */
+.theme-light .text-white:not(.keep-white):not(.bg-emerald-500):not(.bg-emerald-600):not(.bg-slate-900) {
   color: #0f172a !important;
+}
+.theme-light .keep-white,
+.theme-light .keep-white * {
+  color: #ffffff !important;
 }
 .theme-light .text-slate-100,
 .theme-light .text-slate-200 {
@@ -100,127 +201,598 @@
   color: #334155 !important;
 }
 .theme-light .text-slate-400 {
-  color: #64748b !important;
-}
-.theme-light .text-slate-500 {
-  color: #64748b !important;
-}
-
-/* High-contrast Table Headers */
-.theme-light thead,
-.theme-light thead tr,
-.theme-light th {
-  background-color: #f8fafc !important;
   color: #475569 !important;
-  border-color: #e2e8f0 !important;
+}
+.theme-light .text-slate-500,
+.theme-light .text-slate-600 {
+  color: #64748b !important;
 }
 
-/* Inputs & Form Fields in Light Mode */
-.theme-light input,
+/* Accent Text Highlights (Modern Emerald Green) */
+.theme-light .text-cyan-400,
+.theme-light .text-cyan-300,
+.theme-light .text-emerald-400,
+.theme-light .text-emerald-300,
+.theme-light .text-emerald-500,
+.theme-light .text-emerald-600,
+.theme-light .text-emerald-700,
+.theme-light .text-emerald-800,
+.theme-light .group:hover .group-hover\:text-cyan-300,
+.theme-light .group:hover .group-hover\:text-emerald-400 {
+  color: #059669 !important;
+}
+.theme-light .text-teal-400 {
+  color: #0d9488 !important;
+}
+.theme-light .text-amber-400,
+.theme-light .text-amber-300 {
+  color: #d97706 !important;
+}
+.theme-light .text-purple-400,
+.theme-light .text-purple-300 {
+  color: #7c3aed !important;
+}
+.theme-light .text-blue-400,
+.theme-light .text-blue-300 {
+  color: #2563eb !important;
+}
+.theme-light .text-rose-400,
+.theme-light .text-rose-300 {
+  color: #e11d48 !important;
+}
+
+/* Icon Boxes & Status Pills (Modern Emerald Green) */
+.theme-light div.bg-emerald-500,
+.theme-light span.bg-emerald-500 {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+.theme-light div.bg-emerald-50,
+.theme-light button.bg-emerald-50 {
+  background-color: #ecfdf5 !important;
+  border-color: #6ee7b7 !important;
+  color: #065f46 !important;
+}
+.theme-light div.bg-emerald-50 *,
+.theme-light button.bg-emerald-50 * {
+  color: #065f46 !important;
+}
+
+/* ========================================================================== */
+/* 7. MODERN EMERALD GREEN, TEAL & ACCENT BUTTONS                             */
+/* ========================================================================== */
+
+/* Sidebar Navigation Links (Inactive = Clean on Mint-Slate Sidebar, Hover = Crisp White, Active = Modern Emerald Green) */
+.theme-light aside nav button:not(.bg-emerald-600) {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  color: #1e293b !important;
+  border-color: #a7f3d0 !important;
+  font-weight: 700 !important;
+}
+.theme-light aside nav button:not(.bg-emerald-600) svg {
+  color: #059669 !important;
+}
+.theme-light aside nav button:not(.bg-emerald-600):hover {
+  background-color: #ffffff !important;
+  color: #047857 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.14) !important;
+}
+.theme-light aside nav button.bg-emerald-600 {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28) !important;
+}
+.theme-light aside nav button.bg-emerald-600 *,
+.theme-light aside nav button.bg-emerald-600 svg {
+  color: #ffffff !important;
+}
+
+/* Primary Action Buttons (Search/Add, Proceed to Pay, Recent Bills, Switch: Modern Emerald Gradient) */
+.theme-light button.bg-emerald-500,
+.theme-light button.bg-emerald-600,
+.theme-light button.bg-emerald-700,
+.theme-light button.bg-emerald-800,
+.theme-light button.bg-emerald-500\/10,
+.theme-light button.bg-emerald-500\/20,
+.theme-light button.bg-emerald-500\/30,
+.theme-light button.bg-emerald-600\/20,
+.theme-light button.bg-emerald-600\/30,
+.theme-light button.bg-emerald-600\/50,
+.theme-light button.bg-emerald-950,
+.theme-light button.bg-emerald-950\/40,
+.theme-light button.bg-emerald-950\/50,
+.theme-light button.bg-emerald-950\/60,
+.theme-light button.bg-emerald-950\/70,
+.theme-light button.bg-cyan-500,
+.theme-light button.bg-cyan-600,
+.theme-light button.bg-cyan-500\/10,
+.theme-light button.bg-cyan-500\/20,
+.theme-light button.bg-cyan-600\/20,
+.theme-light button.bg-cyan-600\/30,
+.theme-light button.bg-\[\#00d2df\] {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22) !important;
+}
+.theme-light button.bg-emerald-500:hover,
+.theme-light button.bg-emerald-600:hover,
+.theme-light button.bg-emerald-700:hover,
+.theme-light button.bg-emerald-800:hover,
+.theme-light button.bg-cyan-500:hover,
+.theme-light button.bg-cyan-600:hover,
+.theme-light button.bg-\[\#00d2df\]:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #ffffff !important;
+}
+
+/* Secondary Action Buttons (Hold Cart, F9 Lock, Secondary Actions: Pleasant Teal #14b8a6) */
+.theme-light button.bg-teal-500,
+.theme-light button.bg-teal-600,
+.theme-light button.bg-teal-500\/10,
+.theme-light button.bg-teal-500\/20,
+.theme-light button.bg-slate-800,
+.theme-light button.bg-slate-800\/60,
+.theme-light button.bg-slate-800\/80,
+.theme-light button.bg-slate-700,
+.theme-light button.bg-slate-750,
+.theme-light button.bg-slate-900,
+.theme-light button.bg-\[\#121a28\],
+.theme-light button.bg-\[\#121b2a\],
+.theme-light button.bg-\[\#131d2e\],
+.theme-light button.bg-\[\#121c2e\] {
+  background-color: #14b8a6 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+}
+.theme-light button.bg-teal-500:hover,
+.theme-light button.bg-teal-600:hover,
+.theme-light button.bg-slate-800:hover,
+.theme-light button.bg-slate-700:hover,
+.theme-light button.bg-\[\#121a28\]:hover,
+.theme-light button.bg-\[\#121b2a\]:hover {
+  background-color: #0d9488 !important;
+  color: #ffffff !important;
+}
+
+/* Pleasant Sky / Blue Buttons (Card Payment, Import CSV: #3b82f6) */
+.theme-light button.bg-blue-600,
+.theme-light button.bg-blue-500,
+.theme-light button.bg-blue-500\/10,
+.theme-light button.bg-blue-500\/20,
+.theme-light button.bg-blue-500\/30,
+.theme-light button.bg-blue-950,
+.theme-light button.bg-blue-950\/40,
+.theme-light button.bg-blue-950\/70,
+.theme-light button.bg-indigo-600,
+.theme-light button.bg-indigo-500,
+.theme-light button.bg-indigo-500\/10,
+.theme-light button.bg-indigo-500\/20,
+.theme-light button.bg-indigo-600\/20,
+.theme-light button.bg-indigo-600\/30,
+.theme-light button.bg-indigo-600\/50,
+.theme-light button.bg-indigo-900\/40,
+.theme-light button.bg-indigo-950\/60 {
+  background-color: #3b82f6 !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+.theme-light button.bg-blue-500:hover,
+.theme-light button.bg-blue-600:hover,
+.theme-light button.bg-indigo-600:hover,
+.theme-light button.bg-indigo-600\/20:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Pleasant Violet / Purple Buttons (Cheque Payment: #8b5cf6) */
+.theme-light button.bg-violet-500,
+.theme-light button.bg-violet-600,
+.theme-light button.bg-purple-600,
+.theme-light button.bg-purple-500,
+.theme-light button.bg-purple-500\/10,
+.theme-light button.bg-purple-500\/20,
+.theme-light button.bg-purple-500\/30,
+.theme-light button.bg-purple-600\/20,
+.theme-light button.bg-purple-600\/30,
+.theme-light button.bg-purple-950\/40,
+.theme-light button.bg-purple-950\/70 {
+  background-color: #8b5cf6 !important;
+  border-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+.theme-light button.bg-violet-500:hover,
+.theme-light button.bg-purple-600:hover,
+.theme-light button.bg-purple-500:hover {
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+/* Warm Amber Buttons (Open Shift, Start Shift, Recall Cart: #f59e0b) */
+.theme-light button.bg-amber-500,
+.theme-light button.bg-amber-600,
+.theme-light button.bg-amber-500\/10,
+.theme-light button.bg-amber-500\/15,
+.theme-light button.bg-amber-500\/20,
+.theme-light button.bg-amber-500\/25,
+.theme-light button.bg-amber-500\/30,
+.theme-light button.bg-amber-600\/20,
+.theme-light button.bg-amber-600\/30,
+.theme-light button.bg-amber-600\/50,
+.theme-light button.bg-amber-900\/60,
+.theme-light button.bg-amber-950\/40,
+.theme-light button.bg-amber-950\/50,
+.theme-light button.bg-amber-950\/60 {
+  background-color: #f59e0b !important;
+  border-color: #d97706 !important;
+  color: #ffffff !important;
+}
+.theme-light button.bg-amber-500:hover,
+.theme-light button.bg-amber-600:hover,
+.theme-light button.bg-amber-500\/20:hover {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+}
+
+/* Bright Coral / Rose Buttons (Delete, Void, Clear, Logout: #ef4444) */
+.theme-light button.bg-rose-600,
+.theme-light button.bg-rose-500,
+.theme-light button.bg-rose-500\/10,
+.theme-light button.bg-rose-500\/20,
+.theme-light button.bg-rose-600\/20,
+.theme-light button.bg-rose-900,
+.theme-light button.bg-rose-900\/50,
+.theme-light button.bg-rose-900\/60,
+.theme-light button.bg-rose-950,
+.theme-light button.bg-rose-950\/20,
+.theme-light button.bg-rose-950\/30,
+.theme-light button.bg-rose-950\/40,
+.theme-light button.bg-rose-950\/50,
+.theme-light button.bg-rose-950\/60,
+.theme-light button.bg-rose-950\/70,
+.theme-light button.bg-rose-950\/80 {
+  background-color: #ef4444 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+.theme-light button.bg-rose-500:hover,
+.theme-light button.bg-rose-600:hover,
+.theme-light button.bg-rose-950\/30:hover,
+.theme-light button.bg-rose-950\/40:hover,
+.theme-light button.bg-rose-950\/70:hover {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure text and icons inside colored buttons stay pure white */
+.theme-light button.bg-emerald-500 *,
+.theme-light button.bg-emerald-600 *,
+.theme-light button.bg-emerald-700 *,
+.theme-light button.bg-emerald-800 *,
+.theme-light button.bg-emerald-500\/10 *,
+.theme-light button.bg-emerald-500\/20 *,
+.theme-light button.bg-emerald-500\/30 *,
+.theme-light button.bg-emerald-600\/20 *,
+.theme-light button.bg-emerald-600\/30 *,
+.theme-light button.bg-emerald-600\/50 *,
+.theme-light button.bg-emerald-950 *,
+.theme-light button.bg-emerald-950\/40 *,
+.theme-light button.bg-emerald-950\/50 *,
+.theme-light button.bg-emerald-950\/60 *,
+.theme-light button.bg-emerald-950\/70 *,
+.theme-light button.bg-teal-500 *,
+.theme-light button.bg-teal-600 *,
+.theme-light button.bg-teal-500\/10 *,
+.theme-light button.bg-teal-500\/20 *,
+.theme-light button.bg-cyan-500 *,
+.theme-light button.bg-cyan-600 *,
+.theme-light button.bg-cyan-500\/10 *,
+.theme-light button.bg-cyan-500\/20 *,
+.theme-light button.bg-cyan-600\/20 *,
+.theme-light button.bg-cyan-600\/30 *,
+.theme-light button.bg-\[\#00d2df\] *,
+.theme-light button.bg-slate-800 *,
+.theme-light button.bg-slate-800\/60 *,
+.theme-light button.bg-slate-800\/80 *,
+.theme-light button.bg-slate-700 *,
+.theme-light button.bg-slate-750 *,
+.theme-light button.bg-slate-900 *,
+.theme-light button.bg-\[\#121a28\] *,
+.theme-light button.bg-\[\#121b2a\] *,
+.theme-light button.bg-\[\#131d2e\] *,
+.theme-light button.bg-\[\#121c2e\] *,
+.theme-light button.bg-blue-600 *,
+.theme-light button.bg-blue-500 *,
+.theme-light button.bg-blue-500\/10 *,
+.theme-light button.bg-blue-500\/20 *,
+.theme-light button.bg-blue-500\/30 *,
+.theme-light button.bg-blue-950 *,
+.theme-light button.bg-blue-950\/40 *,
+.theme-light button.bg-blue-950\/70 *,
+.theme-light button.bg-indigo-600 *,
+.theme-light button.bg-indigo-500 *,
+.theme-light button.bg-indigo-500\/10 *,
+.theme-light button.bg-indigo-500\/20 *,
+.theme-light button.bg-indigo-600\/20 *,
+.theme-light button.bg-indigo-600\/30 *,
+.theme-light button.bg-indigo-600\/50 *,
+.theme-light button.bg-indigo-900\/40 *,
+.theme-light button.bg-indigo-950\/60 *,
+.theme-light button.bg-violet-500 *,
+.theme-light button.bg-violet-600 *,
+.theme-light button.bg-purple-600 *,
+.theme-light button.bg-purple-500 *,
+.theme-light button.bg-purple-500\/10 *,
+.theme-light button.bg-purple-500\/20 *,
+.theme-light button.bg-purple-500\/30 *,
+.theme-light button.bg-purple-600\/20 *,
+.theme-light button.bg-purple-600\/30 *,
+.theme-light button.bg-purple-950\/40 *,
+.theme-light button.bg-purple-950\/70 *,
+.theme-light button.bg-amber-500 *,
+.theme-light button.bg-amber-600 *,
+.theme-light button.bg-amber-500\/10 *,
+.theme-light button.bg-amber-500\/15 *,
+.theme-light button.bg-amber-500\/20 *,
+.theme-light button.bg-amber-500\/25 *,
+.theme-light button.bg-amber-500\/30 *,
+.theme-light button.bg-amber-600\/20 *,
+.theme-light button.bg-amber-600\/30 *,
+.theme-light button.bg-amber-600\/50 *,
+.theme-light button.bg-amber-900\/60 *,
+.theme-light button.bg-amber-950\/40 *,
+.theme-light button.bg-amber-950\/50 *,
+.theme-light button.bg-amber-950\/60 *,
+.theme-light button.bg-rose-600 *,
+.theme-light button.bg-rose-500 *,
+.theme-light button.bg-rose-500\/10 *,
+.theme-light button.bg-rose-500\/20 *,
+.theme-light button.bg-rose-600\/20 *,
+.theme-light button.bg-rose-900 *,
+.theme-light button.bg-rose-900\/50 *,
+.theme-light button.bg-rose-900\/60 *,
+.theme-light button.bg-rose-950 *,
+.theme-light button.bg-rose-950\/20 *,
+.theme-light button.bg-rose-950\/30 *,
+.theme-light button.bg-rose-950\/40 *,
+.theme-light button.bg-rose-950\/50 *,
+.theme-light button.bg-rose-950\/60 *,
+.theme-light button.bg-rose-950\/70 *,
+.theme-light button.bg-rose-950\/80 * {
+  color: #ffffff !important;
+}
+
+/* 8. Keyboard Shortcut Keys (kbd & F2/F4/F5/F6/F8/Esc badges) - Soft Mint with Clear Forest Text */
+.theme-light kbd,
+.theme-light span.bg-\[\#131d2e\],
+.theme-light span.bg-\[\#121c2e\] {
+  background-color: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+  color: #065f46 !important;
+  font-weight: 700 !important;
+}
+
+/* 9. Clean Light Badges & Pills */
+.theme-light span.bg-cyan-950,
+.theme-light span.bg-cyan-950\/60,
+.theme-light span.bg-emerald-950,
+.theme-light span.bg-emerald-950\/50 {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+  border-color: #6ee7b7 !important;
+}
+.theme-light span.bg-amber-950,
+.theme-light span.bg-amber-950\/50 {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fcd34d !important;
+}
+.theme-light span.bg-rose-950,
+.theme-light span.bg-rose-950\/60 {
+  background-color: #ffe4e6 !important;
+  color: #be123c !important;
+  border-color: #fda4af !important;
+}
+.theme-light span.bg-blue-950 {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  border-color: #93c5fd !important;
+}
+
+/* 10. Search Bar & Form Inputs - Clean, Genuine Emerald POS Look */
+.theme-light .pos-search-hero {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.05) !important;
+}
+
+.theme-light .pos-grand-total-card {
+  background: #ffffff !important;
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 6px 16px -4px rgba(16, 185, 129, 0.14) !important;
+}
+.theme-light .pos-grand-total-card span.total-label {
+  color: #065f46 !important;
+}
+.theme-light .pos-grand-total-card span.total-amount {
+  color: #059669 !important;
+}
+
+/* Genuine 2-Way Split Icon Cards (Add New Product vs Stock Receiving GRN) */
+.theme-light .grn-split-card {
+  background: #ffffff !important;
+  border: 2px solid #cbd5e1 !important;
+  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.06) !important;
+  color: #0f172a !important;
+  transition: all 0.2s ease !important;
+}
+.theme-light .grn-split-card:hover {
+  border-color: #94a3b8 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.1) !important;
+}
+.theme-light .grn-split-card-active-emerald {
+  background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 70%) !important;
+  border: 2.5px solid #10b981 !important;
+  box-shadow: 0 12px 28px -6px rgba(16, 185, 129, 0.25) !important;
+}
+.theme-light .grn-split-card-active-teal {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 70%) !important;
+  border: 2.5px solid #0d9488 !important;
+  box-shadow: 0 12px 28px -6px rgba(13, 148, 136, 0.25) !important;
+}
+.theme-light .grn-split-icon-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+  box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4) !important;
+}
+.theme-light .grn-split-icon-teal {
+  background: linear-gradient(135deg, #0d9488 0%, #0369a1 100%) !important;
+  box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.4) !important;
+}
+.theme-light .grn-split-icon-emerald svg,
+.theme-light .grn-split-icon-teal svg {
+  color: #ffffff !important;
+}
+.theme-light .grn-split-pill-active-emerald {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+.theme-light .grn-split-pill-active-emerald span,
+.theme-light .grn-split-pill-active-emerald svg {
+  color: #ffffff !important;
+}
+.theme-light .grn-split-pill-active-teal {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+}
+.theme-light .grn-split-pill-active-teal span,
+.theme-light .grn-split-pill-active-teal svg {
+  color: #ffffff !important;
+}
+.theme-light .grn-split-pill-inactive {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.theme-light .grn-section-card {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06) !important;
+}
+.theme-light .grn-section-header-1 {
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-bottom: 1.5px solid #cbd5e1 !important;
+  border-left: 5px solid #0f172a !important;
+}
+.theme-light .grn-section-header-2 {
+  background: linear-gradient(90deg, #f0fdf4 0%, #ecfdf5 100%) !important;
+  border-bottom: 1.5px solid #a7f3d0 !important;
+  border-left: 5px solid #059669 !important;
+}
+.theme-light .grn-step-badge-1 {
+  background: #0f172a !important;
+  color: #ffffff !important;
+}
+.theme-light .grn-step-badge-2 {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+.theme-light .grn-payment-subbox {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.theme-light .pos-hero-search-box,
+.theme-light form .bg-\[\#0d1424\] {
+  background-color: #f8fafc !important;
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 4px 16px -2px rgba(16, 185, 129, 0.12) !important;
+}
+.theme-light .pos-hero-search-box:focus-within,
+.theme-light form .bg-\[\#0d1424\]:focus-within {
+  background-color: #ffffff !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.16), 0 8px 20px -4px rgba(16, 185, 129, 0.18) !important;
+}
+.theme-light .bg-cyan-400 {
+  background-color: #10b981 !important;
+}
+
+.theme-light input:not([type="checkbox"]):not([type="radio"]),
 .theme-light select,
 .theme-light textarea {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: #cbd5e1 !important;
 }
+.theme-light .pos-hero-search-box input,
+.theme-light form .bg-\[\#0d1424\] input {
+  background-color: transparent !important;
+  color: #0f172a !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
 .theme-light input::placeholder,
 .theme-light textarea::placeholder {
   color: #94a3b8 !important;
 }
-.theme-light input:focus,
+.theme-light input:not(.bg-transparent):focus,
 .theme-light select:focus,
 .theme-light textarea:focus {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 1px #2563eb !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18) !important;
 }
 
-/* Primary Total & Accent Highlights in Light Mode */
-.theme-light .text-cyan-400 {
-  color: #0284c7 !important;
-}
-.theme-light .text-emerald-400 {
-  color: #059669 !important;
-}
-.theme-light .text-teal-400 {
-  color: #0d9488 !important;
-}
-.theme-light .text-amber-400 {
-  color: #d97706 !important;
-}
-.theme-light .text-purple-400 {
-  color: #7c3aed !important;
-}
-.theme-light .text-blue-400 {
-  color: #2563eb !important;
-}
-
-/* Badge & Tag Pills in Light Mode */
-.theme-light .bg-teal-950 {
-  background-color: #ccfbf1 !important;
-  color: #0f766e !important;
-  border-color: #99f6e4 !important;
-}
-.theme-light .bg-emerald-950 {
-  background-color: #d1fae5 !important;
+/* 11. Table Headers & Rows (Soft Mint Header with Deep Forest Text) */
+.theme-light thead,
+.theme-light thead tr,
+.theme-light th {
+  background-color: #ecfdf5 !important;
   color: #065f46 !important;
   border-color: #a7f3d0 !important;
 }
-.theme-light .bg-amber-950 {
-  background-color: #fef3c7 !important;
-  color: #92400e !important;
-  border-color: #fde68a !important;
-}
-.theme-light .bg-rose-950 {
-  background-color: #ffe4e6 !important;
-  color: #9f1239 !important;
-  border-color: #fecdd3 !important;
-}
-.theme-light .bg-blue-950 {
-  background-color: #dbeafe !important;
-  color: #1e40af !important;
-  border-color: #bfdbfe !important;
-}
-.theme-light .bg-cyan-950 {
-  background-color: #cffafe !important;
-  color: #155e75 !important;
-  border-color: #a5f3fc !important;
-}
 
-/* Modals in Light Mode */
-.theme-light .bg-slate-900.border.border-slate-750,
-.theme-light .bg-\[\#0b101b\].border.border-\[\#1b283f\] {
+.theme-light tbody,
+.theme-light tbody tr {
   background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  color: #1e293b !important;
 }
 
-/* POS Proceed to Pay Button in Light Mode (Square/Shopify Classic Emerald) */
-.theme-light .bg-\[\#00d2df\] {
-  background-color: #10b981 !important;
-  color: #ffffff !important;
-}
-.theme-light .bg-\[\#00d2df\]:hover {
-  background-color: #059669 !important;
+.theme-light tbody tr:hover {
+  background-color: #f8fafc !important;
 }
 
-/* Dark Modal Overlay Backdrop */
-.theme-light .bg-black\/80,
-.theme-light .bg-slate-950\/85 {
-  background-color: rgba(15, 23, 42, 0.65) !important;
-}
-
-/* Keyboard Shortcut Keys in Light Mode */
-.theme-light kbd {
-  background-color: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
-  color: #2563eb !important;
+.theme-light td {
+  border-color: #e2e8f0 !important;
 }
 
 /* Quick Pick Cards & Product Items */
 .theme-light .bg-\[\#0d1424\]:hover,
+.theme-light .hover\:bg-\[\#121d33\]:hover,
+.theme-light .hover\:bg-\[\#131c2f\]:hover,
 .theme-light .hover\:bg-\[\#111928\]\/60:hover,
-.theme-light .hover\:bg-slate-800\/60:hover {
-  background-color: #f1f5f9 !important;
+.theme-light .hover\:bg-slate-800\/60:hover,
+.theme-light .hover\:bg-slate-800\/80:hover {
+  background-color: #ecfdf5 !important;
+  border-color: #34d399 !important;
+}
+
+/* 12. Modals & Lock Screen Backdrop */
+.theme-light .bg-black\/80,
+.theme-light .bg-black\/75,
+.theme-light .bg-slate-950\/85,
+.theme-light .bg-slate-950\/95 {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.theme-light .bg-slate-900.border.border-slate-750,
+.theme-light .bg-\[\#0b101b\].border.border-\[\#1b283f\] {
+  background-color: #ffffff !important;
+  border-color: #6ee7b7 !important;
+  box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.2) !important;
 }
 
 /* Hide scrollbars for clean POS look */
@@ -230,6 +802,31 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Explicit Modal Action Buttons (Red Cancel, Green Save) */
+.btn-cancel-red,
+.theme-light .btn-cancel-red {
+  background: #dc2626 !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+.btn-cancel-red:hover,
+.theme-light .btn-cancel-red:hover {
+  background: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+.btn-save-green,
+.theme-light .btn-save-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+}
+.btn-save-green:hover,
+.theme-light .btn-save-green:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #ffffff !important;
 }
 
 /* ESC/POS Thermal Print Styles */

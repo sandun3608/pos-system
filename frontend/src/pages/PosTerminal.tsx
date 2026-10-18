@@ -524,27 +524,37 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
   const renderOrderSummaryContent = (isMobileSheet: boolean = false) => (
     <div className="flex flex-col h-full min-h-0 select-none">
       {!isMobileSheet && (
-        <h3 className="text-base md:text-lg font-bold text-white tracking-tight mb-4 shrink-0">
-          Order Summary
-        </h3>
+        <div className="flex items-center justify-between mb-3.5 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-xs">
+              <Receipt className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-base md:text-lg font-black text-white tracking-tight">
+              Order Summary
+            </h3>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold uppercase tracking-wider">
+            Live Bill
+          </span>
+        </div>
       )}
 
       {/* Customer & Loyalty Program Card */}
-      <div className="mb-4 p-3 rounded-xl bg-[#0a101d] border border-[#16233b] shrink-0">
+      <div className="mb-3.5 p-3.5 rounded-2xl bg-[#0a101d] border border-[#16233b] shrink-0">
         {!attachedCustomer ? (
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-xs font-extrabold text-slate-300 flex items-center gap-1.5">
+                <User className="w-4 h-4 text-emerald-500" />
                 Customer Loyalty
               </span>
               <button
                 type="button"
                 onClick={() => setIsQuickCustomerModalOpen(true)}
-                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold flex items-center gap-1 transition cursor-pointer shadow-xs"
               >
-                <UserPlus className="w-3 h-3" />
-                + Register
+                <UserPlus className="w-3 h-3 text-white" />
+                <span>+ Register</span>
               </button>
             </div>
 
@@ -563,13 +573,13 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
                     handleCustomerLookup();
                   }
                 }}
-                className="flex-1 bg-[#0c1322] border border-[#1b283f] text-xs text-white px-2.5 py-1.5 rounded-lg outline-hidden focus:border-cyan-500 placeholder:text-slate-500 font-mono"
+                className="flex-1 bg-[#0c1322] border border-[#1b283f] text-xs text-white px-3 py-2 rounded-xl outline-hidden focus:border-emerald-500 placeholder:text-slate-500 font-mono"
               />
               <button
                 type="button"
                 onClick={() => handleCustomerLookup()}
                 disabled={isCustomerSearching || !customerPhoneInput.trim()}
-                className="px-2.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 text-white text-xs font-bold rounded-lg transition cursor-pointer"
+                className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-xs"
               >
                 {isCustomerSearching ? '...' : 'Find'}
               </button>
@@ -592,8 +602,8 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                  <UserCheck className="w-3.5 h-3.5" />
+                <div className="w-7 h-7 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                  <UserCheck className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <span className="text-xs font-bold text-white truncate block">
@@ -668,7 +678,7 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
                         );
                         setPointsToRedeem(maxRedeemable);
                       }}
-                      className="text-[10px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-1.5 py-0.5 rounded font-bold transition cursor-pointer"
+                      className="text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded font-bold transition cursor-pointer"
                     >
                       Max
                     </button>
@@ -680,18 +690,28 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
         )}
       </div>
 
-      {/* Summary Breakdown Metrics */}
-      <div className="space-y-3.5 text-xs md:text-sm">
-        <div className="flex items-center justify-between text-slate-400">
-          <span>Total Line Items:</span>
-          <span className="font-bold text-white font-mono">{cart.length}</span>
+      {/* Modern 2-Column Mini Stat Boxes */}
+      <div className="grid grid-cols-2 gap-2.5 mb-3.5 shrink-0">
+        <div className="bg-[#090e18] border border-[#162135] rounded-2xl p-3 flex flex-col justify-between">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+            Line Items
+          </span>
+          <span className="text-xl font-black text-white font-mono mt-0.5">
+            {cart.length}
+          </span>
         </div>
-
-        <div className="flex items-center justify-between text-slate-400">
-          <span>Total Units / Quantity:</span>
-          <span className="font-bold text-white font-mono">{formattedItemCount}</span>
+        <div className="bg-[#090e18] border border-[#162135] rounded-2xl p-3 flex flex-col justify-between">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+            Total Quantity
+          </span>
+          <span className="text-xl font-black text-emerald-400 font-mono mt-0.5">
+            {formattedItemCount}
+          </span>
         </div>
+      </div>
 
+      {/* Summary Breakdown Card */}
+      <div className="bg-[#090e18] border border-[#162135] rounded-2xl p-3.5 space-y-2.5 text-xs md:text-sm shrink-0">
         {itemDiscountsTotal > 0 && (
           <div className="flex items-center justify-between text-slate-400">
             <span>Items Gross Total:</span>
@@ -705,23 +725,23 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
           <div className="flex items-center justify-between text-emerald-400 text-xs">
             <span className="flex items-center gap-1 font-semibold">
               <Tag className="w-3.5 h-3.5" />
-              Item Discounts Total:
+              Item Discounts:
             </span>
             <span className="font-mono font-bold">- {currency}{itemDiscountsTotal.toFixed(2)}</span>
           </div>
         )}
 
         <div className="flex items-center justify-between text-slate-400">
-          <span>{itemDiscountsTotal > 0 ? 'Net Items Subtotal:' : 'Subtotal:'}</span>
-          <span className="font-bold text-white font-mono text-sm md:text-base">
+          <span className="font-semibold">{itemDiscountsTotal > 0 ? 'Net Subtotal:' : 'Subtotal:'}</span>
+          <span className="font-extrabold text-white font-mono text-sm md:text-base">
             {currency}{subtotal.toFixed(2)}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-slate-400 text-xs">
           <span>Tax Mode:</span>
-          <span className="text-slate-400 font-mono">
-            {isTaxEnabled ? `Standard (${taxRate}%)` : 'Tax-Free / Direct Total'}
+          <span className="px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-400 font-mono font-bold text-[11px]">
+            {isTaxEnabled ? `Standard (${taxRate}%)` : 'Tax-Free'}
           </span>
         </div>
 
@@ -737,7 +757,7 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
           <div className="flex items-center justify-between text-xs text-amber-400">
             <span className="flex items-center gap-1">
               <Star className="w-3.5 h-3.5 fill-amber-400" />
-              Loyalty Discount ({pointsToRedeem} pts):
+              Loyalty ({pointsToRedeem} pts):
             </span>
             <span className="font-mono font-bold">- {currency}{pointsDiscount.toFixed(2)}</span>
           </div>
@@ -747,8 +767,8 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
         {isDiscountsEnabled && (
           <div className="pt-2 border-t border-[#162135]">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-xs">
-                {itemDiscountsTotal > 0 ? 'Order Discount (Overall):' : 'Discount:'}
+              <span className="text-slate-400 text-xs font-semibold">
+                {itemDiscountsTotal > 0 ? 'Order Discount:' : 'Discount:'}
               </span>
               <div className="flex items-center gap-1">
                 <span className="text-slate-500 text-xs font-mono">- {currency}</span>
@@ -771,7 +791,7 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
                     }
                   }}
                   placeholder="0.00"
-                  className="w-20 bg-[#0c1322] border border-[#1b283f] text-right px-2 py-0.5 text-xs text-amber-300 font-mono rounded-lg outline-hidden focus:border-cyan-500"
+                  className="w-20 bg-[#0c1322] border border-[#1b283f] text-right px-2 py-1 text-xs text-amber-300 font-mono rounded-lg outline-hidden focus:border-emerald-500"
                 />
                 {discountAmount > 0 && (
                   <button
@@ -789,22 +809,28 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
         )}
       </div>
 
-      {/* Big Total Row */}
-      <div className="pt-4 sm:pt-6 pb-3 sm:pb-4 border-t border-[#162135] mt-4 flex items-baseline justify-between shrink-0">
-        <span className="text-lg sm:text-xl md:text-2xl font-extrabold text-white">Total:</span>
-        <span className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono tracking-tight">
+      {/* Clean Genuine Grand Total Card */}
+      <div className="pos-grand-total-card mt-3.5 p-4 rounded-2xl bg-[#090e18] border border-emerald-500/40 flex items-center justify-between shrink-0">
+        <div>
+          <span className="total-label text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+            Grand Total Due
+          </span>
+          <span className="total-label text-sm font-extrabold text-white">
+            Net Payable
+          </span>
+        </div>
+        <span className="total-amount text-2xl sm:text-3xl font-black text-emerald-400 font-mono tracking-tight">
           {currency}{totalDue.toFixed(2)}
         </span>
       </div>
 
       {/* Live Customer Discount Banner */}
       {totalCustomerSavings > 0 && (
-        <div className="p-3 rounded-xl bg-emerald-950/70 border border-emerald-500/50 flex items-center justify-between shadow-lg shrink-0 animate-in fade-in mb-3">
+        <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-950/70 border border-emerald-500/50 flex items-center justify-between shadow-sm shrink-0 animate-in fade-in">
           <div>
-            <span className="font-extrabold text-xs text-emerald-300 block font-sans">DISCOUNT</span>
-            <span className="text-[10px] text-emerald-400/80 font-bold uppercase tracking-wider">Total Customer Discount</span>
+            <span className="font-extrabold text-[11px] text-emerald-300 block font-sans">TOTAL SAVINGS</span>
           </div>
-          <span className="text-base font-black text-emerald-300 font-mono">
+          <span className="text-sm font-black text-emerald-300 font-mono">
             {currency}{totalCustomerSavings.toFixed(2)}
           </span>
         </div>
@@ -814,7 +840,7 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
       {!isMobileSheet && <div className="flex-1 min-h-0" />}
 
       {/* Bottom Actions */}
-      <div className="space-y-2.5 sm:space-y-3 pt-3 shrink-0">
+      <div className="space-y-2.5 pt-3 shrink-0">
         {/* Recall Held Carts (if any exist) */}
         {heldCarts.length > 0 && (
           <button
@@ -823,33 +849,32 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
               handleRecallCart(0);
               if (isMobileSheet) setIsMobileSummaryOpen(false);
             }}
-            className="w-full py-2.5 px-4 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold rounded-xl flex items-center justify-center gap-2 text-xs transition cursor-pointer"
+            className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 text-xs transition cursor-pointer shadow-xs"
           >
-            <PlayCircle className="w-4 h-4" />
+            <PlayCircle className="w-4 h-4 text-white" />
             <span>Recall Held Cart ({heldCarts.length}) [F1]</span>
           </button>
         )}
 
-        {/* Hold Cart Button (F8) */}
-        <button
-          type="button"
-          onClick={() => {
-            handleHoldCart();
-            if (isMobileSheet) setIsMobileSummaryOpen(false);
-          }}
-          disabled={cart.length === 0}
-          className="w-full py-3 px-4 bg-[#121a28] hover:bg-[#182337] disabled:opacity-30 disabled:cursor-not-allowed border border-[#1e2a40] text-slate-200 font-bold rounded-2xl flex items-center justify-center gap-2 text-sm transition cursor-pointer"
-        >
-          <PauseCircle className="w-4 h-4 text-slate-400" />
-          <span>Hold Cart</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-400 font-mono text-[10px]">
-            F8
-          </span>
-        </button>
-
         {/* Payment Buttons */}
         {isWholesale ? (
           <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => {
+                handleHoldCart();
+                if (isMobileSheet) setIsMobileSummaryOpen(false);
+              }}
+              disabled={cart.length === 0}
+              className="w-full py-2.5 px-4 bg-teal-500 hover:bg-teal-600 disabled:cursor-not-allowed text-white font-bold rounded-xl flex items-center justify-center gap-2 text-xs transition cursor-pointer shadow-xs"
+            >
+              <PauseCircle className="w-4 h-4 text-white" />
+              <span>Hold Bill</span>
+              <span className="px-1.5 py-0.5 rounded bg-white/25 text-white font-mono text-[10px] font-bold">
+                F8
+              </span>
+            </button>
+
             <div className="grid grid-cols-2 gap-2">
               {/* Pay Cash (F4) */}
               <button
@@ -861,11 +886,11 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
                   }
                 }}
                 disabled={cart.length === 0}
-                className="py-3 px-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-1.5 text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition cursor-pointer active:scale-98"
+                className="py-3 px-3 bg-emerald-500 hover:bg-emerald-600 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-1.5 text-xs sm:text-sm shadow-sm transition cursor-pointer active:scale-98"
               >
-                <DollarSign className="w-4 h-4" />
+                <DollarSign className="w-4 h-4 text-white" />
                 <span>Cash</span>
-                <span className="px-1.5 py-0.2 rounded bg-emerald-950/40 text-emerald-200 font-mono text-[10px]">
+                <span className="px-1.5 py-0.5 rounded bg-white/25 text-white font-mono text-[10px] font-bold">
                   F4
                 </span>
               </button>
@@ -880,11 +905,11 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
                   }
                 }}
                 disabled={cart.length === 0}
-                className="py-3 px-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-1.5 text-xs sm:text-sm shadow-md shadow-blue-600/20 transition cursor-pointer active:scale-98"
+                className="py-3 px-3 bg-blue-500 hover:bg-blue-600 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-1.5 text-xs sm:text-sm shadow-sm transition cursor-pointer active:scale-98"
               >
-                <CreditCard className="w-4 h-4" />
+                <CreditCard className="w-4 h-4 text-white" />
                 <span>Card</span>
-                <span className="px-1.5 py-0.2 rounded bg-blue-950/40 text-blue-200 font-mono text-[10px]">
+                <span className="px-1.5 py-0.5 rounded bg-white/25 text-white font-mono text-[10px] font-bold">
                   F5
                 </span>
               </button>
@@ -900,34 +925,72 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
                 }
               }}
               disabled={cart.length === 0}
-              className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-2 text-sm shadow-lg shadow-purple-600/20 transition cursor-pointer active:scale-98"
+              className="w-full py-3 px-4 bg-violet-500 hover:bg-violet-600 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-2 text-sm shadow-sm transition cursor-pointer active:scale-98"
             >
-              <FileCheck className="w-4 h-4" />
+              <FileCheck className="w-4 h-4 text-white" />
               <span>Pay with Cheque / Check</span>
-              <span className="px-1.5 py-0.5 rounded bg-purple-950/40 text-purple-200 font-mono text-[10px]">
+              <span className="px-1.5 py-0.5 rounded bg-white/25 text-white font-mono text-[10px] font-bold">
                 F6
               </span>
             </button>
           </div>
         ) : (
-          /* Retail Mode: Default Proceed to Pay Button (F4) */
-          <button
-            type="button"
-            onClick={() => {
-              if (cart.length > 0) {
-                if (isMobileSheet) setIsMobileSummaryOpen(false);
-                setIsCashModalOpen(true);
-              }
-            }}
-            disabled={cart.length === 0}
-            className="w-full py-3.5 px-4 bg-[#00d2df] hover:bg-[#15e1ee] disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black rounded-2xl flex items-center justify-center gap-2 text-base shadow-xl shadow-cyan-500/25 transition cursor-pointer active:scale-98"
-          >
-            <CreditCard className="w-5 h-5" />
-            <span>Proceed to Pay</span>
-            <span className="px-2 py-0.5 rounded bg-slate-950/20 text-slate-950 font-mono text-xs font-bold">
-              F4
-            </span>
-          </button>
+          /* Retail Mode: Hold + Card Row & Large Cash / Proceed to Pay Button */
+          <div className="space-y-2.5">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  handleHoldCart();
+                  if (isMobileSheet) setIsMobileSummaryOpen(false);
+                }}
+                disabled={cart.length === 0}
+                className="py-2.5 px-3 bg-teal-500 hover:bg-teal-600 disabled:cursor-not-allowed text-white font-bold rounded-xl flex items-center justify-center gap-1.5 text-xs transition cursor-pointer shadow-xs"
+              >
+                <PauseCircle className="w-4 h-4 text-white" />
+                <span>Hold</span>
+                <span className="px-1.5 py-0.5 rounded bg-white/25 text-white font-mono text-[10px] font-bold">
+                  F8
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (cart.length > 0) {
+                    if (isMobileSheet) setIsMobileSummaryOpen(false);
+                    setIsCardModalOpen(true);
+                  }
+                }}
+                disabled={cart.length === 0}
+                className="py-2.5 px-3 bg-blue-500 hover:bg-blue-600 disabled:cursor-not-allowed text-white font-bold rounded-xl flex items-center justify-center gap-1.5 text-xs transition cursor-pointer shadow-xs"
+              >
+                <CreditCard className="w-4 h-4 text-white" />
+                <span>Card</span>
+                <span className="px-1.5 py-0.5 rounded bg-white/25 text-white font-mono text-[10px] font-bold">
+                  F5
+                </span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (cart.length > 0) {
+                  if (isMobileSheet) setIsMobileSummaryOpen(false);
+                  setIsCashModalOpen(true);
+                }
+              }}
+              disabled={cart.length === 0}
+              className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-600 disabled:cursor-not-allowed text-white font-black rounded-2xl flex items-center justify-center gap-2 text-base shadow-md shadow-emerald-500/20 transition cursor-pointer active:scale-98"
+            >
+              <DollarSign className="w-5 h-5 text-white" />
+              <span>Proceed to Pay</span>
+              <span className="px-2 py-0.5 rounded bg-white/25 text-white font-mono text-xs font-bold">
+                F4
+              </span>
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -939,307 +1002,306 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
       {/* ========================================================================= */}
       {/* LEFT COLUMN: Top Search Bar & Active Checkout Items Table (Flex-1)        */}
       {/* ========================================================================= */}
-      <div className="flex-1 min-w-0 min-h-0 flex flex-col p-2.5 sm:p-4 gap-2.5 sm:gap-3.5 h-full overflow-hidden">
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col p-3 sm:p-4 gap-3.5 sm:gap-4 h-full overflow-hidden">
         
-        {/* Shift Alert Banner (if no shift is open) */}
-        {!activeShift && (
-          <div className="bg-amber-500/10 border border-amber-500/25 px-3 sm:px-4 py-2 rounded-xl flex items-center justify-between text-amber-300 text-xs shrink-0">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>
-                <strong>Notice:</strong> No cash drawer shift is currently open.
-              </span>
-            </div>
-            <button
-              onClick={onOpenShiftModal}
-              className="px-3 py-1 bg-amber-500 text-slate-950 font-bold rounded-lg hover:bg-amber-400 transition cursor-pointer shrink-0"
-            >
-              Open Shift
-            </button>
-          </div>
-        )}
-
         {/* Wholesale Mode Banner */}
         {isWholesale && (
-          <div className="bg-gradient-to-r from-indigo-950/80 via-purple-950/60 to-slate-900 border border-indigo-500/40 px-3.5 py-2 rounded-2xl flex items-center justify-between text-indigo-200 text-xs shrink-0 shadow-md">
+          <div className="wholesale-banner bg-emerald-500 border border-emerald-400 px-4 py-2.5 rounded-2xl flex items-center justify-between text-white text-xs shrink-0 shadow-sm">
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
-                <Building2 className="w-3.5 h-3.5" />
+              <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0">
+                <Building2 className="w-4 h-4 text-white" />
               </div>
               <div>
                 <span className="font-extrabold text-white text-xs tracking-wide block">
                   WHOLESALE TERMINAL (B2B TRADE)
                 </span>
-                <span className="text-[10px] text-indigo-300 hidden sm:inline">
+                <span className="text-[10px] text-emerald-50 hidden sm:inline">
                   Item-by-item discounts & overall cart discounts enabled
                 </span>
               </div>
             </div>
-            <span className="text-[10px] bg-indigo-500/25 text-indigo-300 border border-indigo-400/30 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+            <span className="text-[10px] bg-white/20 text-white border border-white/30 font-bold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono">
               B2B Mode Active
             </span>
           </div>
         )}
 
-        {/* TOP SEARCH BAR */}
-        <div className="w-full shrink-0">
-          <form onSubmit={handleBarcodeSubmit} ref={searchContainerRef} className="relative w-full">
-            <div className="relative flex items-center bg-[#0d1424] border border-[#1b283f] focus-within:border-cyan-500/80 focus-within:ring-1 focus-within:ring-cyan-500/30 rounded-2xl shadow-lg transition">
-              {/* Left Search Icon & Barcode Stripes Icon */}
-              <div className="flex items-center gap-1.5 pl-3 sm:pl-4 pointer-events-none">
-                <Search className="w-4 h-4 text-cyan-400 shrink-0" />
-                <div className="hidden sm:flex items-center gap-0.5 text-cyan-400/90 font-mono tracking-tighter text-xs font-bold shrink-0">
-                  <span className="w-0.5 h-3.5 bg-cyan-400 inline-block rounded-full"></span>
-                  <span className="w-1 h-3.5 bg-cyan-400 inline-block rounded-full"></span>
-                  <span className="w-0.5 h-3.5 bg-cyan-400 inline-block rounded-full"></span>
-                  <span className="w-1 h-3.5 bg-cyan-400 inline-block rounded-full"></span>
-                </div>
-              </div>
-
-              {/* Input */}
-              <input
-                ref={barcodeInputRef}
-                type="text"
-                value={barcodeInput}
-                onChange={(e) => setBarcodeInput(e.target.value)}
-                placeholder="Search product, brand, or scan barcode... (F2)"
-                className="w-full bg-transparent text-white text-xs md:text-sm font-medium py-2.5 sm:py-3 px-2 sm:px-3 outline-hidden placeholder:text-slate-500"
-                autoFocus
-              />
-
-              {/* Action Buttons & F2 Shortcut Badge */}
-              <div className="flex items-center gap-2 pr-3 shrink-0">
-                {barcodeInput && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBarcodeInput('');
-                      setSuggestions([]);
-                      setShowSuggestions(false);
-                      focusBarcode();
-                    }}
-                    className="p-1 text-slate-400 hover:text-white rounded-lg transition cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-
-                {barcodeInput && (
-                  <button
-                    type="submit"
-                    className="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer"
-                  >
-                    Add (↵)
-                  </button>
-                )}
-
-                <span className="px-2 py-0.5 rounded-md bg-[#131d2e] border border-[#1f2e47] text-cyan-400 font-mono text-[11px] font-bold">
-                  F2
-                </span>
-              </div>
-            </div>
-
-            {/* Error Message Toast */}
-            {errorMessage && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-rose-950/90 border border-rose-800 px-4 py-2.5 rounded-xl text-rose-200 text-xs flex items-center justify-between shadow-2xl z-50 animate-in fade-in">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-                <button onClick={() => setErrorMessage(null)} className="text-rose-400 hover:text-white font-bold ml-2 cursor-pointer">✕</button>
-              </div>
-            )}
-
-            {/* Autocomplete Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-[#0d1424] border border-[#1b283f] rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-[#162135] animate-in fade-in zoom-in-95">
-                <div className="px-4 py-2 bg-[#090e18] text-[10px] uppercase tracking-wider font-bold text-slate-400 flex items-center justify-between">
-                  <span>Matching Catalog Products ({suggestions.length})</span>
-                  <span className="text-slate-500">Click or press Enter to add</span>
-                </div>
-                <div className="max-h-72 overflow-y-auto divide-y divide-[#162135]">
-                  {suggestions.map((item) => {
-                    const isOutOfStock = typeof item.stock_quantity === 'number' && item.stock_quantity <= 0;
-                    return (
-                      <div
-                        key={item.id}
-                        onClick={() => {
-                          if (isOutOfStock) {
-                            setErrorMessage(`"${item.name}" is out of stock (0 available).`);
-                            return;
-                          }
-                          handleProductSelected(item);
-                          setBarcodeInput('');
-                          setSuggestions([]);
-                          setShowSuggestions(false);
-                          focusBarcode();
-                        }}
-                        className={`p-3 flex items-center justify-between transition ${
-                          isOutOfStock
-                            ? 'opacity-40 cursor-not-allowed bg-rose-950/10'
-                            : 'hover:bg-[#131c2f] cursor-pointer group'
-                        }`}
-                      >
-                        <div className="flex-1 pr-4">
-                          <div className={`font-bold text-xs md:text-sm line-clamp-1 ${isOutOfStock ? 'text-slate-400' : 'text-white group-hover:text-cyan-300 transition'}`}>
-                            {item.name}
-                          </div>
-                          <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400 font-mono">
-                            <span className="text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">
-                              {item.barcode}
-                            </span>
-                            {item.category_name && <span>{item.category_name}</span>}
-                            {item.brand && <span className="text-slate-500">• {item.brand}</span>}
-                          </div>
-                        </div>
-                        <div className="text-right font-mono shrink-0">
-                          <span className={`font-extrabold text-sm block ${isOutOfStock ? 'text-slate-500' : 'text-cyan-400'}`}>
-                            {currency}{item.selling_price.toFixed(2)}
-                          </span>
-                          {item.mrp && item.mrp > item.selling_price ? (
-                            <span className="text-[10px] text-slate-500 line-through block" title="Actual Price">
-                              {currency}{item.mrp.toFixed(2)}
-                            </span>
-                          ) : null}
-                          <span className="text-[10px] text-slate-400">
-                            Stock:{' '}
-                            <strong className={isOutOfStock ? 'text-rose-500 font-bold' : item.stock_quantity <= 5 ? 'text-rose-400' : 'text-slate-300'}>
-                              {isOutOfStock ? '0 (Out of stock)' : `${item.stock_quantity} ${item.unit || 'pcs'}`}
-                            </strong>
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </form>
-        </div>
-
-        {/* ACTIVE CHECKOUT ITEMS CARD (Fills remaining height) */}
-        <div className="bg-[#0b101b] border border-[#162135] rounded-2xl flex-1 min-h-0 flex flex-col overflow-hidden shadow-2xl">
-          
-          {/* Card Header */}
-          <div className="px-5 py-3 border-b border-[#162135] flex items-center justify-between shrink-0 bg-[#090e18]">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                <ShoppingBag className="w-4 h-4" />
-              </div>
-              <h2 className="text-xs sm:text-sm font-bold text-cyan-400 tracking-wide truncate">
-                Active Items ({cart.length})
+        {/* CLEAN, GENUINE CENTERED ITEM SEARCH CARD */}
+        <div className="pos-search-hero relative w-full shrink-0 bg-[#0b101b] border border-[#162135] rounded-2xl p-4 sm:p-5 z-30">
+          <div className="max-w-3xl mx-auto w-full flex flex-col items-center">
+            {/* Clean Centered Title */}
+            <div className="flex items-center justify-center gap-2 mb-2.5 text-center">
+              <span className="px-2.5 py-0.5 rounded-md bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold uppercase tracking-wider">
+                POS Scanner
+              </span>
+              <h2 className="text-base sm:text-lg font-extrabold text-white tracking-tight">
+                Item Search & Barcode Lookup
               </h2>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsRecentBillsOpen(true)}
-                className="px-2 sm:px-2.5 py-1 bg-[#121b2a] hover:bg-[#182438] text-slate-200 border border-[#1e2c44] rounded-lg text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition cursor-pointer"
-                title="View Bills, Reprint Slips, and Void Bills"
-              >
-                <Receipt className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span className="hidden xs:inline">Recent Bills</span>
-                <span className="text-[9px] px-1 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-800 font-black uppercase">
-                  Void
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleClearCart}
-                disabled={cart.length === 0}
-                className="text-slate-400 hover:text-rose-400 disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center gap-1 text-xs font-semibold cursor-pointer px-1.5 py-1"
-              >
-                <span>✕ Clear</span>
-                <span className="hidden sm:inline px-1 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-400 text-[10px] font-mono">
-                  Esc
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Table or Empty State (Takes all remaining card height) */}
-          <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
-            {cart.length === 0 ? (
-              <div className="flex-1 min-h-0 flex flex-col p-6 overflow-y-auto">
-                {/* Empty State Banner */}
-                <div className="flex flex-col items-center justify-center py-4 text-center shrink-0">
-                  <div className="w-14 h-14 rounded-2xl bg-[#0e1626] border border-[#1b283f] flex items-center justify-center shadow-inner mb-3">
-                    <ShoppingBag className="w-7 h-7 text-cyan-400 stroke-1" />
-                  </div>
-                  <p className="text-sm font-bold text-white">Active Cart Empty</p>
-                  <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                    Scan a product barcode or press <kbd className="bg-[#121c2e] text-cyan-400 px-1.5 py-0.5 rounded border border-[#1f2e48] font-mono text-[11px]">F2</kbd> to search catalog items.
-                  </p>
+            {/* Large Centered Search Input Form */}
+            <form onSubmit={handleBarcodeSubmit} ref={searchContainerRef} className="relative w-full">
+              <div className="pos-hero-search-box relative flex items-center bg-[#0d1424] rounded-2xl p-1.5 transition">
+                {/* Left Search Icon Box */}
+                <div className="w-11 h-11 rounded-xl bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-xs ml-0.5">
+                  <Search className="w-5 h-5 text-white" />
                 </div>
 
-                {/* QUICK-TAP FREQUENT ITEMS SHELF (Fills the marked area) */}
-                <div className="mt-4 flex-1 flex flex-col min-h-0">
-                  <div className="flex items-center justify-between mb-3 px-1 shrink-0">
-                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                      <span>Quick-Tap Frequent Items</span>
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-mono">Single-click to add to cart</span>
-                  </div>
+                {/* Large Centered-Feel Input */}
+                <input
+                  ref={barcodeInputRef}
+                  type="text"
+                  value={barcodeInput}
+                  onChange={(e) => setBarcodeInput(e.target.value)}
+                  placeholder="Search item name, brand, or scan barcode... (F2)"
+                  className="w-full bg-transparent text-white text-sm sm:text-base md:text-lg font-bold py-2.5 px-3.5 outline-hidden placeholder:text-slate-400 placeholder:font-medium text-center sm:text-left"
+                  autoFocus
+                />
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-2">
-                    {quickPickItems.map((prod) => {
-                      const isOutOfStock = typeof prod.stock_quantity === 'number' && prod.stock_quantity <= 0;
+                {/* Right Action Buttons & F2 Shortcut Badge */}
+                <div className="flex items-center gap-2 pr-1 shrink-0">
+                  {barcodeInput && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBarcodeInput('');
+                        setSuggestions([]);
+                        setShowSuggestions(false);
+                        focusBarcode();
+                      }}
+                      className="p-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition cursor-pointer shadow-xs"
+                      title="Clear search"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="px-4 sm:px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs sm:text-sm font-extrabold transition shadow-xs cursor-pointer flex items-center gap-2"
+                  >
+                    <span>Search / Add</span>
+                    <span className="hidden sm:inline px-1.5 py-0.5 rounded bg-white/25 text-white font-mono text-[10px] font-bold">
+                      F2
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Error Message Toast */}
+              {errorMessage && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-rose-600 border border-rose-500 px-4 py-3 rounded-2xl text-white text-xs sm:text-sm font-bold flex items-center justify-between shadow-2xl z-50 animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-white shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                  <button onClick={() => setErrorMessage(null)} className="text-white hover:opacity-80 font-bold ml-2 cursor-pointer">✕</button>
+                </div>
+              )}
+
+              {/* Large Autocomplete Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[#0d1424] border-2 border-emerald-500 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-[#162135] animate-in fade-in zoom-in-95">
+                  <div className="px-4 py-2.5 bg-[#090e18] text-xs uppercase tracking-wider font-extrabold text-emerald-400 flex items-center justify-between">
+                    <span>Matching Products ({suggestions.length})</span>
+                    <span className="text-slate-400 text-[11px]">Click item or press Enter to add</span>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto divide-y divide-[#162135]">
+                    {suggestions.map((item) => {
+                      const isOutOfStock = typeof item.stock_quantity === 'number' && item.stock_quantity <= 0;
                       return (
                         <div
-                          key={prod.id}
+                          key={item.id}
                           onClick={() => {
                             if (isOutOfStock) {
-                              setErrorMessage(`"${prod.name}" is out of stock (0 available).`);
+                              setErrorMessage(`"${item.name}" is out of stock (0 available).`);
                               return;
                             }
-                            handleProductSelected(prod);
+                            handleProductSelected(item);
+                            setBarcodeInput('');
+                            setSuggestions([]);
+                            setShowSuggestions(false);
+                            focusBarcode();
                           }}
-                          className={`bg-[#0d1424] border rounded-xl p-3 flex flex-col justify-between transition shadow-sm ${
+                          className={`p-3.5 sm:p-4 flex items-center justify-between transition ${
                             isOutOfStock
-                              ? 'opacity-40 border-rose-900/30 cursor-not-allowed'
-                              : 'hover:bg-[#121d33] border-[#1b283f] hover:border-cyan-500/50 cursor-pointer group active:scale-98'
+                              ? 'opacity-45 cursor-not-allowed bg-rose-950/10'
+                              : 'hover:bg-[#131c2f] cursor-pointer group'
                           }`}
                         >
-                          <div>
-                            <div className={`font-bold text-xs uppercase line-clamp-1 ${isOutOfStock ? 'text-slate-400' : 'text-white group-hover:text-cyan-300 transition'}`}>
-                              {prod.name}
+                          <div className="flex-1 pr-4">
+                            <div className={`font-extrabold text-sm sm:text-base line-clamp-1 ${isOutOfStock ? 'text-slate-400' : 'text-white group-hover:text-emerald-400 transition'}`}>
+                              {item.name}
                             </div>
-                            <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center justify-between">
-                              <span>{prod.barcode}</span>
-                              <span className={isOutOfStock ? 'text-rose-400 font-semibold' : 'text-slate-500'}>
-                                {isOutOfStock ? 'Out of Stock' : (prod.unit || 'pcs')}
+                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-400 font-mono">
+                              <span className="text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-md border border-emerald-500/40 font-bold">
+                                {item.barcode}
                               </span>
+                              {item.category_name && <span className="font-semibold">{item.category_name}</span>}
+                              {item.brand && <span className="text-slate-500">• {item.brand}</span>}
                             </div>
                           </div>
-                          <div className="flex items-baseline justify-between mt-3 pt-2 border-t border-[#162135]">
-                            <div>
-                              <span className={`text-xs font-extrabold font-mono ${isOutOfStock ? 'text-slate-500' : 'text-cyan-400'}`}>
-                                {currency}{prod.selling_price.toFixed(2)}
+                          <div className="text-right font-mono shrink-0">
+                            <span className={`font-black text-base sm:text-lg block ${isOutOfStock ? 'text-slate-500' : 'text-emerald-400'}`}>
+                              {currency}{item.selling_price.toFixed(2)}
+                            </span>
+                            {item.mrp && item.mrp > item.selling_price ? (
+                              <span className="text-[11px] text-slate-500 line-through block" title="Actual Price">
+                                {currency}{item.mrp.toFixed(2)}
                               </span>
-                              {prod.mrp && prod.mrp > prod.selling_price ? (
-                                <span className="text-[10px] text-slate-500 line-through font-mono ml-1.5" title="Actual Price">
-                                  {currency}{prod.mrp.toFixed(2)}
-                                </span>
-                              ) : null}
-                            </div>
-                            {isOutOfStock ? (
-                              <span className="text-[9px] bg-rose-950/60 text-rose-400 border border-rose-800/40 px-1.5 py-0.5 rounded font-bold">
-                                NO STOCK
-                              </span>
-                            ) : (
-                              <span className="text-[10px] bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold group-hover:bg-cyan-500 group-hover:text-slate-950 transition">
-                                + ADD
-                              </span>
-                            )}
+                            ) : null}
+                            <span className="text-xs text-slate-400">
+                              Stock:{' '}
+                              <strong className={isOutOfStock ? 'text-rose-500 font-bold' : item.stock_quantity <= 5 ? 'text-amber-500 font-bold' : 'text-emerald-400 font-bold'}>
+                                {isOutOfStock ? '0 (Out of stock)' : `${item.stock_quantity} ${item.unit || 'pcs'}`}
+                              </strong>
+                            </span>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
+              )}
+            </form>
+          </div>
+        </div>
+
+        {/* ACTIVE CHECKOUT ITEMS CARD (Fills remaining height) */}
+        <div className="bg-[#0b101b] border border-[#162135] rounded-2xl flex-1 min-h-0 flex flex-col overflow-hidden shadow-lg">
+          
+          {/* Card Header */}
+          <div className="px-5 py-3 border-b border-[#162135] flex items-center justify-between shrink-0 bg-[#090e18]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white shadow-xs">
+                <ShoppingBag className="w-4 h-4 text-white" />
+              </div>
+              <h2 className="text-sm font-extrabold text-white tracking-tight truncate">
+                Active Bill Items ({cart.length})
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsRecentBillsOpen(true)}
+                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                title="View Bills, Reprint Slips, and Void Bills"
+              >
+                <Receipt className="w-3.5 h-3.5 text-white shrink-0" />
+                <span>Recent Bills</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleClearCart}
+                disabled={cart.length === 0}
+                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:cursor-not-allowed text-white rounded-xl transition flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-xs"
+              >
+                <span>✕ Clear</span>
+                <span className="hidden sm:inline px-1.5 py-0.5 rounded bg-white/25 text-white text-[10px] font-mono font-bold">
+                  Esc
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Table or Clean Empty State (Takes all remaining card height) */}
+          <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+            {cart.length === 0 ? (
+              <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+                {/* Genuine POS Table Column Header Bar */}
+                <div className="hidden sm:grid grid-cols-12 px-5 py-2.5 bg-[#0e1626] border-b border-[#162135] text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
+                  <div className="col-span-5">Item Details</div>
+                  <div className="col-span-2 text-right">Unit Price</div>
+                  <div className="col-span-2 text-center">Quantity</div>
+                  <div className="col-span-2 text-right">Line Total</div>
+                  <div className="col-span-1 text-center">Action</div>
+                </div>
+
+                {quickPickItems.length > 0 ? (
+                  /* QUICK-TAP FREQUENT ITEMS SHELF (When items exist in DB) */
+                  <div className="flex-1 flex flex-col min-h-0 p-5">
+                    <div className="flex items-center justify-between mb-3 px-1 shrink-0">
+                      <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>Quick-Tap Popular Items</span>
+                      </span>
+                      <span className="text-xs text-slate-400">Click any item to add to bill</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-2">
+                      {quickPickItems.map((prod) => {
+                        const isOutOfStock = typeof prod.stock_quantity === 'number' && prod.stock_quantity <= 0;
+                        return (
+                          <div
+                            key={prod.id}
+                            onClick={() => {
+                              if (isOutOfStock) {
+                                setErrorMessage(`"${prod.name}" is out of stock (0 available).`);
+                                return;
+                              }
+                              handleProductSelected(prod);
+                            }}
+                            className={`bg-[#0d1424] border rounded-xl p-3 flex flex-col justify-between transition shadow-xs ${
+                              isOutOfStock
+                                ? 'opacity-45 border-rose-900/30 cursor-not-allowed'
+                                : 'hover:bg-[#121d33] border-[#1b283f] hover:border-emerald-500 cursor-pointer group active:scale-98'
+                            }`}
+                          >
+                            <div>
+                              <div className={`font-bold text-xs sm:text-sm uppercase line-clamp-1 ${isOutOfStock ? 'text-slate-400' : 'text-white group-hover:text-emerald-400 transition'}`}>
+                                {prod.name}
+                              </div>
+                              <div className="text-[11px] text-slate-400 font-mono mt-1 flex items-center justify-between">
+                                <span className="px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 font-bold text-[10px]">
+                                  {prod.barcode}
+                                </span>
+                                <span className={isOutOfStock ? 'text-rose-400 font-bold' : 'text-slate-400 font-medium'}>
+                                  {isOutOfStock ? 'Out of Stock' : `${prod.stock_quantity} ${prod.unit || 'pcs'}`}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#162135]">
+                              <div>
+                                <span className={`text-sm font-black font-mono ${isOutOfStock ? 'text-slate-500' : 'text-emerald-400'}`}>
+                                  {currency}{prod.selling_price.toFixed(2)}
+                                </span>
+                                {prod.mrp && prod.mrp > prod.selling_price ? (
+                                  <span className="text-[10px] text-slate-500 line-through font-mono ml-1.5" title="Actual Price">
+                                    {currency}{prod.mrp.toFixed(2)}
+                                  </span>
+                                ) : null}
+                              </div>
+                              {isOutOfStock ? (
+                                <span className="text-[10px] bg-rose-950 text-rose-400 border border-rose-800/40 px-2 py-0.5 rounded font-bold">
+                                  NO STOCK
+                                </span>
+                              ) : (
+                                <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded font-bold shadow-xs">
+                                  + ADD
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  /* CLEAN, GENUINE PROFESSIONAL EMPTY BILL STATE */
+                  <div className="flex-1 flex flex-col justify-center items-center p-6 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-[#0e1626] border border-[#162135] flex items-center justify-center mb-3">
+                      <ShoppingBag className="w-6 h-6 text-emerald-500" />
+                    </div>
+                    <h3 className="text-base font-extrabold text-white">
+                      No Items in Current Bill
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1 max-w-sm leading-relaxed">
+                      Scan a product barcode or use the search bar above (<kbd className="px-1.5 py-0.5 rounded text-[10px]">F2</kbd>) to add items to this bill.
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <>

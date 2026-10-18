@@ -14,10 +14,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     try {
-      const saved = localStorage.getItem('pos_theme') as ThemeMode;
+      const saved = localStorage.getItem('pos_theme_v2') as ThemeMode;
       if (saved === 'light' || saved === 'dark') return saved;
     } catch {}
-    return 'dark'; // Default to dark POS
+    return 'light'; // Default to Premium White & Emerald Green POS theme
   });
 
   const applyTheme = (mode: ThemeMode) => {
@@ -36,7 +36,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     applyTheme(theme);
     try {
-      localStorage.setItem('pos_theme', theme);
+      localStorage.setItem('pos_theme_v2', theme);
     } catch {}
   }, [theme]);
 

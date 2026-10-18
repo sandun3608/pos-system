@@ -926,11 +926,14 @@ productsRouter.post('/', async (req: Request, res: Response): Promise<void> => {
 
     const id = 'prod_' + uuidv4().slice(0, 8);
     const calculatedSku = sku || barcode;
+    const isInInv = calculatedStock > 0 || req.body.is_in_inventory ? 1 : 0;
+    const todayTag = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+    const effectiveBatch = batch_number || (calculatedStock > 0 ? `B-${todayTag}-${Math.floor(100 + Math.random() * 900)}` : null);
 
     await dbRun(
       `INSERT INTO products (
-        id, barcode, sku, name, brand, category_id, cost_price, selling_price, mrp, stock_quantity, unit, is_quick_pick, batch_number, expiry_date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id, barcode, sku, name, brand, category_id, cost_price, selling_price, mrp, stock_quantity, is_in_inventory, unit, is_quick_pick, batch_number, expiry_date
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         barcode,
@@ -941,13 +944,33 @@ productsRouter.post('/', async (req: Request, res: Response): Promise<void> => {
         Number(cost_price) || 0,
         calculatedSelling,
         calculatedMrp,
-        Number(stock_quantity) || 0,
+        calculatedStock,
+        isInInv,
         unit || 'pcs',
         is_quick_pick ? 1 : 0,
-        batch_number || null,
+        effectiveBatch,
         expiry_date || null,
       ]
     );
+
+    if (calculatedStock > 0 && effectiveBatch) {
+      const batchId = 'batch_' + uuidv4().slice(0, 8);
+      await dbRun(
+        `INSERT INTO product_batches (
+          id, product_id, batch_number, cost_price, selling_price, mrp, stock_quantity, expiry_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          batchId,
+          id,
+          effectiveBatch,
+          Number(cost_price) || 0,
+          calculatedSelling,
+          calculatedMrp,
+          calculatedStock,
+          expiry_date || null,
+        ]
+      );
+    }
 
     const created = await dbGet('SELECT * FROM products WHERE id = ?', [id]);
     res.status(201).json(created);

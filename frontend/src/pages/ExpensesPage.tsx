@@ -322,9 +322,9 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#080d1a] text-slate-100 overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full bg-slate-950 text-slate-100 overflow-y-auto">
       {/* Top Header */}
-      <div className="bg-[#0b1222] border-b border-slate-800/80 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+      <div className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400">
             <Receipt className="w-6 h-6" />
@@ -346,11 +346,11 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
           <button
             type="button"
             onClick={exportCsv}
-            className="flex items-center gap-2 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 rounded-xl text-xs font-semibold transition cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer"
             title="Export filtered expenses as CSV"
           >
-            <Download className="w-4 h-4 text-slate-400" />
-            Export CSV
+            <Download className="w-4 h-4 text-emerald-400" />
+            <span>Export CSV</span>
           </button>
           <button
             type="button"
@@ -358,18 +358,18 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
               loadExpenses();
               loadSummary();
             }}
-            className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 rounded-xl transition cursor-pointer"
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl transition cursor-pointer"
             title="Refresh records"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-teal-400 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button
             type="button"
             onClick={handleOpenAddModal}
-            className="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-rose-900/30 cursor-pointer"
+            className="btn-cancel-red flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-rose-900/30 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Record Expense
+            <span>Record Expense</span>
           </button>
         </div>
       </div>
@@ -378,90 +378,90 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
       <div className="p-6 space-y-6 flex-1">
         {/* KPI Cards Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all hover:border-slate-700">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Filtered Total</span>
-              <div className="p-2 bg-rose-500/10 text-rose-400 rounded-xl">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Filtered Total</span>
+              <div className="p-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl">
                 <TrendingDown className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-rose-400">
+              <span className="text-2xl font-black text-rose-500">
                 {currency} {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
               {totalCount} expense {totalCount === 1 ? 'entry' : 'entries'} in selected view
             </p>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-rose-500" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-rose-500" />
           </div>
 
-          <div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all hover:border-slate-700">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Today's Expenses</span>
-              <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Today's Expenses</span>
+              <div className="p-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl">
                 <Clock className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-slate-100">
+              <span className="text-2xl font-black text-amber-500">
                 {currency} {(summary?.today_expenses || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 mt-1">Paid out today</p>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-amber-500" />
           </div>
 
-          <div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all hover:border-slate-700">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">This Month</span>
-              <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">This Month</span>
+              <div className="p-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl">
                 <Calendar className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-slate-100">
+              <span className="text-2xl font-black text-indigo-400">
                 {currency} {(summary?.this_month_expenses || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 mt-1">Current calendar month overhead</p>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-indigo-500" />
           </div>
 
-          <div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all hover:border-slate-700">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Top Spend Category</span>
-              <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Top Spend Category</span>
+              <div className="p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl">
                 <Tag className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2">
               {summary?.by_category && summary.by_category.length > 0 ? (
                 <>
-                  <div className="text-lg font-bold text-slate-100 truncate">
+                  <div className="text-lg font-bold text-emerald-400 truncate">
                     {summary.by_category[0].category}
                   </div>
-                  <p className="text-[11px] text-emerald-400 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
                     {currency} {summary.by_category[0].amount.toLocaleString()} ({summary.by_category[0].percentage}%)
                   </p>
                 </>
               ) : (
-                <div className="text-sm text-slate-500 mt-2">No category data yet</div>
+                <div className="text-sm text-slate-500 mt-2 italic">No category data yet</div>
               )}
             </div>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500" />
           </div>
         </div>
 
         {/* Category Distribution Breakdown (Horizontal bars) */}
         {summary?.by_category && summary.by_category.length > 0 && (
-          <div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Tag className="w-3.5 h-3.5 text-rose-400" />
                 Category Spending Distribution
               </h3>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-500 font-semibold">
                 {summary.by_category.length} {summary.by_category.length === 1 ? 'category' : 'categories'}
               </span>
             </div>
@@ -469,7 +469,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
               {summary.by_category.slice(0, 6).map((cat) => {
                 const color = getCategoryColor(cat.category);
                 return (
-                  <div key={cat.category} className="bg-[#080d1a] border border-slate-800/60 rounded-xl p-3">
+                  <div key={cat.category} className="bg-slate-950 border border-slate-800 rounded-xl p-3 shadow-xs">
                     <div className="flex items-center justify-between text-xs mb-1.5">
                       <span className={`font-semibold truncate max-w-[150px] ${color.text}`}>
                         {cat.category}
@@ -478,7 +478,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                         {currency} {cat.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
-                    <div className="w-full bg-slate-800/80 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                       <div
                         className="bg-rose-500 h-full rounded-full transition-all duration-300"
                         style={{ width: `${Math.min(100, Math.max(3, cat.percentage))}%` }}
@@ -486,7 +486,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                     </div>
                     <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1">
                       <span>{cat.count} {cat.count === 1 ? 'entry' : 'entries'}</span>
-                      <span>{cat.percentage}% of total</span>
+                      <span className="font-bold">{cat.percentage}% of total</span>
                     </div>
                   </div>
                 );
@@ -496,17 +496,17 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
         )}
 
         {/* Filter Controls & Search Toolbar */}
-        <div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-3">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             {/* Period Quick Select */}
-            <div className="flex items-center gap-1 bg-[#080d1a] p-1 rounded-xl border border-slate-800/80 overflow-x-auto shrink-0">
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto shrink-0">
               <button
                 type="button"
                 onClick={() => setPeriod('today')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                   period === 'today'
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 Today
@@ -516,8 +516,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 onClick={() => setPeriod('this_week')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                   period === 'this_week'
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 7 Days
@@ -527,8 +527,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 onClick={() => setPeriod('this_month')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                   period === 'this_month'
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 This Month
@@ -538,8 +538,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 onClick={() => setPeriod('all')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                   period === 'all'
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 All Time
@@ -549,8 +549,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 onClick={() => setPeriod('custom')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                   period === 'custom'
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 Custom Range
@@ -559,7 +559,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
 
             {/* Custom Date Pickers */}
             {period === 'custom' && (
-              <div className="flex items-center gap-2 bg-[#080d1a] px-3 py-1 rounded-xl border border-slate-800/80">
+              <div className="flex items-center gap-2 bg-slate-950 px-3 py-1 rounded-xl border border-slate-800">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-xs text-slate-400 font-medium">From:</span>
                 <input
@@ -586,13 +586,13 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 placeholder="Search by description, reference, category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#080d1a] border border-slate-800/80 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                className="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-rose-500"
               />
               {searchTerm && (
                 <button
                   type="button"
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -601,7 +601,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
           </div>
 
           {/* Filter Dropdowns Row */}
-          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800/60">
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800">
             <div className="flex items-center gap-2">
               <Filter className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-xs text-slate-400 font-semibold">Filter:</span>
@@ -614,7 +614,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 setSelectedCategory(e.target.value);
                 setPage(1);
               }}
-              className="bg-[#080d1a] border border-slate-800/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500 cursor-pointer"
+              className="bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500 cursor-pointer"
             >
               <option value="">All Categories</option>
               {categories.map((c) => (
@@ -631,7 +631,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 setSelectedPaymentMethod(e.target.value);
                 setPage(1);
               }}
-              className="bg-[#080d1a] border border-slate-800/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500 cursor-pointer"
+              className="bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500 cursor-pointer"
             >
               <option value="">All Payment Methods</option>
               <option value="CASH">Cash</option>
@@ -650,7 +650,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                   setSearchTerm('');
                   setPage(1);
                 }}
-                className="text-xs text-rose-400 hover:text-rose-300 font-medium underline cursor-pointer ml-auto"
+                className="text-xs text-rose-400 hover:text-rose-300 font-bold underline cursor-pointer ml-auto"
               >
                 Reset Filters
               </button>
@@ -659,11 +659,11 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
         </div>
 
         {/* Expenses Data Table */}
-        <div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#080d1a] border-b border-slate-800/80 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <tr className="bg-slate-950 border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Category</th>
                   <th className="py-3 px-4">Description / Notes</th>
@@ -674,20 +674,20 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                   <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50 text-xs">
+              <tbody className="divide-y divide-slate-800/60 text-xs">
                 {loading ? (
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-slate-400">
                       <RefreshCw className="w-6 h-6 animate-spin mx-auto text-rose-500 mb-2" />
-                      Loading operating expenses...
+                      <span>Loading operating expenses...</span>
                     </td>
                   </tr>
                 ) : expenses.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-400">
-                      <Receipt className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-                      <p className="font-semibold text-slate-300">No expense records found</p>
-                      <p className="text-xs text-slate-500 mt-1">
+                    <td colSpan={8} className="py-14 text-center text-slate-400">
+                      <Receipt className="w-10 h-10 mx-auto text-slate-500 mb-3 opacity-60" />
+                      <p className="font-bold text-slate-200 text-sm">No expense records found</p>
+                      <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
                         Try adjusting your filters or click "Record Expense" to add overhead costs
                       </p>
                     </td>
@@ -696,7 +696,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                   expenses.map((expense) => {
                     const color = getCategoryColor(expense.category);
                     return (
-                      <tr key={expense.id} className="hover:bg-slate-800/30 transition">
+                      <tr key={expense.id} className="hover:bg-slate-800/40 transition">
                         <td className="py-3 px-4 font-medium text-slate-300 whitespace-nowrap">
                           {expense.expense_date}
                         </td>
@@ -726,7 +726,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                         <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
                           {expense.created_by_name || 'Owner'}
                         </td>
-                        <td className="py-3 px-4 text-right font-black text-rose-400 whitespace-nowrap text-sm">
+                        <td className="py-3 px-4 text-right font-black text-rose-400 whitespace-nowrap text-sm font-mono">
                           {currency} {expense.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap text-center">
@@ -759,7 +759,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
 
           {/* Pagination Footer */}
           {totalPages > 1 && (
-            <div className="bg-[#080d1a] border-t border-slate-800/80 px-4 py-3 flex items-center justify-between text-xs text-slate-400">
+            <div className="bg-slate-950 border-t border-slate-800 px-4 py-3 flex items-center justify-between text-xs text-slate-400">
               <div>
                 Showing page <span className="font-bold text-white">{page}</span> of{' '}
                 <span className="font-bold text-white">{totalPages}</span> ({totalCount} total entries)
@@ -792,10 +792,10 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
       {/* Add / Edit Expense Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-          <div className="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="bg-[#080d1a] border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-rose-500/10 text-rose-400 rounded-xl">
+                <div className="p-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div>
@@ -810,7 +810,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg transition"
+                className="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -835,7 +835,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                     required
                     value={formData.expense_date}
                     onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })}
-                    className="w-full bg-[#080d1a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
                   />
                 </div>
 
@@ -844,7 +844,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                     Amount ({currency}) *
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                       {currency}
                     </span>
                     <input
@@ -855,7 +855,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                       placeholder="0.00"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      className="w-full bg-[#080d1a] border border-slate-800 rounded-xl pl-10 pr-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-rose-500"
+                      className="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -869,7 +869,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full bg-[#080d1a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 cursor-pointer"
+                  className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 cursor-pointer"
                 >
                   {categories.map((c) => (
                     <option key={c} value={c}>
@@ -891,7 +891,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                     placeholder="e.g. Legal & Audit, Courier, Insurance..."
                     value={formData.customCategory}
                     onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
-                    className="w-full bg-[#080d1a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
                   />
                 </div>
               )}
@@ -905,7 +905,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                   <select
                     value={formData.payment_method}
                     onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-                    className="w-full bg-[#080d1a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 cursor-pointer"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 cursor-pointer"
                   >
                     <option value="CASH">Cash</option>
                     <option value="CARD">Card</option>
@@ -924,7 +924,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                     placeholder="e.g. INV-9041, CEB-4819"
                     value={formData.reference_no}
                     onChange={(e) => setFormData({ ...formData, reference_no: e.target.value })}
-                    className="w-full bg-[#080d1a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
                   />
                 </div>
               </div>
@@ -939,29 +939,30 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
                   placeholder="Additional details (e.g. Shop electric bill for September, Mechanic lunch allowance, Brake lathe lubrication)"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-[#080d1a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 resize-none"
+                  className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 resize-none"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-800">
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition cursor-pointer"
+                  className="btn-cancel-red px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                 >
-                  Cancel
+                  <X className="w-3.5 h-3.5" />
+                  <span>Cancel</span>
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex items-center gap-1.5 px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-rose-900/30 cursor-pointer disabled:opacity-50"
+                  className="btn-save-green flex items-center gap-1.5 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-900/30 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                   ) : (
                     <Check className="w-3.5 h-3.5" />
                   )}
-                  {editingExpense ? 'Save Changes' : 'Record Expense'}
+                  <span>{editingExpense ? 'Save Changes' : 'Record Expense'}</span>
                 </button>
               </div>
             </form>
@@ -972,7 +973,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
       {/* Delete Confirmation Modal */}
       {deleteConfirmExpense && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-          <div className="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
@@ -980,7 +981,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
               <h3 className="text-base font-bold text-white">Delete Expense Record?</h3>
               <p className="text-xs text-slate-400 mt-1">
                 Are you sure you want to delete the expense of{' '}
-                <strong className="text-rose-400">
+                <strong className="text-rose-400 font-mono">
                   {currency} {deleteConfirmExpense.amount.toFixed(2)}
                 </strong>{' '}
                 for <strong className="text-slate-200">{deleteConfirmExpense.category}</strong>?
@@ -990,17 +991,19 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ settings, currentUse
               <button
                 type="button"
                 onClick={() => setDeleteConfirmExpense(null)}
-                className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition cursor-pointer"
+                className="btn-cancel-red flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm flex items-center justify-center gap-1"
               >
-                Cancel
+                <X className="w-3.5 h-3.5" />
+                <span>Cancel</span>
               </button>
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleDeleteExpense}
-                className="flex-1 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                className="btn-cancel-red flex-1 py-2.5 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1"
               >
-                {isSubmitting ? 'Deleting...' : 'Yes, Delete'}
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isSubmitting ? 'Deleting...' : 'Yes, Delete'}</span>
               </button>
             </div>
           </div>
