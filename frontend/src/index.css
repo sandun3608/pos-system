@@ -186,7 +186,7 @@
 }
 
 /* 6. Clear Readable Typography on White Cards */
-.theme-light .text-white:not(.keep-white):not(.bg-emerald-500):not(.bg-emerald-600):not(.bg-slate-900) {
+.theme-light .text-white:not(.keep-white):not(.bg-emerald-500):not(.bg-emerald-600):not(.bg-slate-900):not(.hub-color-card):not(.hub-color-card *) {
   color: #0f172a !important;
 }
 .theme-light .keep-white,
