@@ -67,7 +67,7 @@ export const LaunchpadHub: React.FC<LaunchpadHubProps> = ({
 
   const isProcurementEnabled = settings?.feature_procurement === 'true';
 
-  const featureCards: HubCardItem[] = [
+  const allCards: HubCardItem[] = [
     {
       id: 'inventory',
       title: 'Inventory',
@@ -171,7 +171,9 @@ export const LaunchpadHub: React.FC<LaunchpadHubProps> = ({
       // Hidden from Hub per user request
       visible: false,
     },
-  ].filter((c) => c.visible);
+  ];
+
+  const featureCards = allCards.filter((c) => c.visible);
 
   return (
     <div className="flex-1 h-full w-full overflow-y-auto bg-[#070b13] p-3 sm:p-5 lg:p-8 flex flex-col justify-between select-none custom-scrollbar">

@@ -912,29 +912,29 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                   setIsAddProductModalOpen(true);
                 }
               }}
-              className="grn-split-card rounded-2xl p-5 flex items-center justify-between gap-4 cursor-pointer text-left hover:border-emerald-500/60 hover:shadow-lg transition group"
+              className="grn-split-card rounded-2xl p-3.5 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 cursor-pointer text-left hover:border-emerald-500/60 hover:shadow-lg transition group"
             >
-              <div className="flex items-center gap-4">
-                <div className="grn-split-icon-emerald w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <Plus className="w-9 h-9 stroke-[2.75]" />
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="grn-split-icon-emerald w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Plus className="w-6 h-6 sm:w-9 sm:h-9 stroke-[2.75]" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-700">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-700">
                       1. Catalog Registration
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-600">Pop-up Form</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-emerald-600">Pop-up Form</span>
                   </div>
-                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 mt-1 tracking-tight">
+                  <h2 className="text-base sm:text-xl font-extrabold text-slate-900 mt-1 tracking-tight truncate">
                     Add New Product
                   </h2>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 line-clamp-1 sm:line-clamp-none">
                     Click to open pop-up to register new barcode, prices & initial stock
                   </p>
                 </div>
               </div>
 
-              <div className="px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition grn-split-pill-active-emerald shadow-md">
+              <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition grn-split-pill-active-emerald shadow-md">
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span className="hidden sm:inline">Add Product</span>
               </div>
@@ -948,23 +948,23 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') setIsCreateGrnModalOpen(true);
               }}
-              className="grn-split-card rounded-2xl p-5 flex items-center justify-between gap-4 cursor-pointer text-left hover:border-teal-500/60 hover:shadow-lg transition group"
+              className="grn-split-card rounded-2xl p-3.5 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 cursor-pointer text-left hover:border-teal-500/60 hover:shadow-lg transition group"
             >
-              <div className="flex items-center gap-4">
-                <div className="grn-split-icon-teal w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <ClipboardCheck className="w-9 h-9 stroke-[2.25]" />
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="grn-split-icon-teal w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <ClipboardCheck className="w-6 h-6 sm:w-9 sm:h-9 stroke-[2.25]" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-700">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-700">
                       2. Supplier Stock & Bills
                     </span>
-                    <span className="text-[10px] font-bold text-teal-600">Pop-up Form</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-teal-600">Pop-up Form</span>
                   </div>
-                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 mt-1 tracking-tight">
+                  <h2 className="text-base sm:text-xl font-extrabold text-slate-900 mt-1 tracking-tight truncate">
                     Stock Receiving (GRN)
                   </h2>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 line-clamp-1 sm:line-clamp-none">
                     Click to open pop-up to receive incoming deliveries & settle bills
                   </p>
                 </div>
@@ -977,10 +977,10 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                     e.stopPropagation();
                     setIsCreateGrnModalOpen(true);
                   }}
-                  className="px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition grn-split-pill-active-teal shadow-md cursor-pointer"
+                  className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition grn-split-pill-active-teal shadow-md cursor-pointer"
                 >
                   <Package className="w-4 h-4 stroke-[2.25]" />
-                  <span>New GRN</span>
+                  <span className="hidden sm:inline">New GRN</span>
                   {draftItems.length > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px]">
                       {draftItems.length}
@@ -1895,11 +1895,11 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                  <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto justify-end">
                     <button
                       type="button"
                       onClick={() => setIsCreateGrnModalOpen(false)}
-                      className="btn-cancel-red px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-sm shadow-rose-900/20 flex items-center gap-1.5"
+                      className="btn-cancel-red w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-sm shadow-rose-900/20 flex items-center justify-center gap-1.5"
                     >
                       <X className="w-4 h-4" />
                       <span>Cancel</span>
@@ -1907,7 +1907,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                     <button
                       type="button"
                       onClick={clearDraft}
-                      className="btn-cancel-red px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
+                      className="btn-cancel-red w-full sm:w-auto px-4 py-2.5 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Clear List</span>
@@ -1915,7 +1915,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="btn-save-green px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-900/30 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                      className="btn-save-green w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                       {isSubmitting ? (
                         <span>Processing & Updating Inventory...</span>
@@ -2019,18 +2019,18 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-800">
                   <button
                     type="button"
                     onClick={() => setIsAddSupplierOpen(false)}
-                    className="btn-cancel-red px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-xs flex items-center gap-1.5"
+                    className="btn-cancel-red w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-xs flex items-center justify-center gap-1.5"
                   >
                     <X className="w-3.5 h-3.5" />
                     <span>Cancel</span>
                   </button>
                   <button
                     type="submit"
-                    className="btn-save-green px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs cursor-pointer transition shadow-xs flex items-center gap-1.5"
+                    className="btn-save-green w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs cursor-pointer transition shadow-xs flex items-center justify-center gap-1.5"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Save Supplier</span>
@@ -2268,7 +2268,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
             </div>
 
             <form onSubmit={handleSaveQuickProduct} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-xs font-semibold text-slate-400">
@@ -2344,7 +2344,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1">Brand</label>
                   <input
@@ -2373,7 +2373,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1">Cost Price ({currency})</label>
                   <input
@@ -2449,18 +2449,18 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsQuickProductOpen(false)}
-                  className="btn-cancel-red px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md shadow-rose-900/20 flex items-center gap-1.5"
+                  className="btn-cancel-red w-full sm:w-auto px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md shadow-rose-900/20 flex items-center justify-center gap-1.5"
                 >
                   <X className="w-4 h-4" />
                   <span>Cancel</span>
                 </button>
                 <button
                   type="submit"
-                  className="btn-save-green px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-900/30 transition cursor-pointer flex items-center gap-1.5"
+                  className="btn-save-green w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-900/30 transition cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Check className="w-4 h-4 stroke-[2.5]" />
                   <span>Add New Product & Save</span>
@@ -2512,7 +2512,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
               {/* Body */}
               <div className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
                 {/* Balance & Totals Cards */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                   <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-center">
                     <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Amount</span>
                     <span className="text-base font-bold text-slate-200 mt-1 block">
@@ -2568,7 +2568,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
 
                   {/* Cheque Specific Details */}
                   {recordPaymentForm.payment_method === 'cheque' && (
-                    <div className="grid grid-cols-2 gap-3 p-3.5 bg-blue-950/20 border border-blue-900/40 rounded-xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-blue-950/20 border border-blue-900/40 rounded-xl">
                       <div>
                         <label className="text-[11px] font-semibold text-blue-300 mb-1 block">Cheque Number *</label>
                         <input
@@ -2731,11 +2731,11 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/50 flex items-center justify-between">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-800 bg-slate-950/50 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setIsPaymentModalOpen(false)}
-                  className="btn-cancel-red px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  className="btn-cancel-red w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <X className="w-3.5 h-3.5" />
                   <span>Close</span>
@@ -2744,7 +2744,7 @@ export const GrnManagement: React.FC<GrnManagementProps> = ({ settings, currentU
                   type="submit"
                   form="record-payment-form"
                   disabled={isRecordingPayment || balance <= 0}
-                  className="btn-save-green px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-900/30 transition cursor-pointer flex items-center gap-2"
+                  className="btn-save-green w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-900/30 transition cursor-pointer flex items-center justify-center gap-2"
                 >
                   {isRecordingPayment ? (
                     <>

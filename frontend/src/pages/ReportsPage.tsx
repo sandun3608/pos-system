@@ -440,21 +440,21 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, currentUser 
 
           {/* Time Period Selector & Action Buttons */}
           <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-between lg:justify-end">
-            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto max-w-full">
               {(['daily', 'weekly', 'monthly', 'all'] as AnalyticsPeriod[]).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                     period === p
                       ? 'bg-emerald-500 text-white shadow-xs'
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   {p === 'daily' && 'අද (Daily)'}
-                  {p === 'weekly' && 'සතිය (7 Days)'}
-                  {p === 'monthly' && 'මාසය (30 Days)'}
-                  {p === 'all' && 'මුළු කාලයම (All)'}
+                  {p === 'weekly' && 'සතිය (7d)'}
+                  {p === 'monthly' && 'මාසය (30d)'}
+                  {p === 'all' && 'මුළු (All)'}
                 </button>
               ))}
             </div>
@@ -470,20 +470,21 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, currentUser 
               </div>
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={exportCurrentReportCsv}
-                className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                className="px-2.5 sm:px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
               >
                 <Download className="w-3.5 h-3.5 text-white" />
-                <span>CSV Download</span>
+                <span className="hidden sm:inline">CSV Download</span>
+                <span className="sm:hidden text-[11px]">CSV</span>
               </button>
               <button
                 onClick={() => window.print()}
-                className="px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                className="px-2.5 sm:px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
               >
                 <Printer className="w-3.5 h-3.5 text-white" />
-                <span>Print</span>
+                <span className="hidden sm:inline">Print</span>
               </button>
               <button
                 onClick={loadReports}
@@ -608,63 +609,63 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, currentUser 
         {activeReport === 'sales_profit' && (
           <div className="space-y-5 animate-in fade-in">
             {/* 4 Big Clear Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-5 shadow-md">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-extrabold uppercase text-slate-400 block">1. මුළු විකුණුම් (Total Sales)</span>
-                    <span className="text-[11px] text-slate-400">{summary.total_orders || 0} Bills • {summary.total_units_sold || 0} Items</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-extrabold uppercase text-slate-400 block truncate">1. විකුණුම් (Sales)</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">{summary.total_orders || 0} Bills • {summary.total_units_sold || 0} Items</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                    <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black text-emerald-400 mt-3 font-mono">
+                <div className="text-lg sm:text-2xl lg:text-3xl font-black text-emerald-400 mt-2 sm:mt-3 font-mono truncate">
                   {currency}{grossRev.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-5 shadow-md">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-extrabold uppercase text-slate-400 block">2. බඩුවල ගැනුම් මිල (COGS)</span>
-                    <span className="text-[11px] text-slate-400">විකුණපු බඩුවල Cost එක</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-extrabold uppercase text-slate-400 block truncate">2. ගැනුම් මිල (COGS)</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">Cost of Goods</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center">
-                    <Tag className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center shrink-0">
+                    <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black text-blue-400 mt-3 font-mono">
+                <div className="text-lg sm:text-2xl lg:text-3xl font-black text-blue-400 mt-2 sm:mt-3 font-mono truncate">
                   {currency}{cogsVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-5 shadow-md">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-extrabold uppercase text-slate-400 block">3. කඩේ වියදම් (Expenses)</span>
-                    <span className="text-[11px] text-slate-400">{summary.expense_count || 0} Expense Bills</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-extrabold uppercase text-slate-400 block truncate">3. වියදම් (Expenses)</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">{summary.expense_count || 0} Bills</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center">
-                    <TrendingDown className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0">
+                    <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black text-rose-400 mt-3 font-mono">
+                <div className="text-lg sm:text-2xl lg:text-3xl font-black text-rose-400 mt-2 sm:mt-3 font-mono truncate">
                   {currency}{expensesVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
 
-              <div className="bg-slate-900 border-2 border-emerald-500 rounded-2xl p-5 shadow-lg">
+              <div className="bg-slate-900 border-2 border-emerald-500 rounded-2xl p-3 sm:p-5 shadow-lg">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-extrabold uppercase text-emerald-400 block">4. ශුද්ධ ලාභය (Net Profit)</span>
-                    <span className="text-[11px] text-slate-400">වියදම් අඩු කළ පසු අතට ලාභය</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-extrabold uppercase text-emerald-400 block truncate">4. ලාභය (Net Profit)</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">Net Takeaway</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center">
-                    <ArrowUpRight className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black text-emerald-400 mt-3 font-mono">
+                <div className="text-lg sm:text-2xl lg:text-3xl font-black text-emerald-400 mt-2 sm:mt-3 font-mono truncate">
                   {currency}{netProfitVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
